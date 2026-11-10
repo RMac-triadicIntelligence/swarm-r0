@@ -1,0 +1,15 @@
+{
+ "code_sha256_in_header": "5cd115c23bd865729fed78315ae900c994dae4dd3edd53d7f63423436d8a6c17",
+ "code_sha256_now": "5cd115c23bd865729fed78315ae900c994dae4dd3edd53d7f63423436d8a6c17",
+ "errors": [],
+ "ledger_head": "748b367b72cb5ecc99eb524f16ab079c08994a80d6dc8df5621ddde11049694a",
+ "n_blocks": 673,
+ "n_errors": 0,
+ "n_lines": 3231,
+ "n_vote_exec_checked_I2": 15,
+ "ok": true,
+ "resim_identical": true,
+ "resim_ledger_head": "748b367b72cb5ecc99eb524f16ab079c08994a80d6dc8df5621ddde11049694a",
+ "stamp": "SEED-v0.1 cdc788b1996bd923d48a034b28f58ee728ce10d82924724c722b2b7be7e719f5",
+ "what": "ENGINEERING VALIDATION ONLY (I2 removal decisions reproducible, I3 eligible-only counting, I5 hash chain, block/tx hashes, PoA rules, contract re-execution of all forks, per-tick ref capture, truth hash); says nothing about paper fidelity or R0"
+}

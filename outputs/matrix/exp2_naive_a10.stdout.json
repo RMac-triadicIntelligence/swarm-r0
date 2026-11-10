@@ -1,0 +1,120 @@
+{
+ "R0_note": "Engineering validation (replay/hash/invariant checks) is NOT R0. R0 = paper direction at alpha=10; computed result above.",
+ "R0_source": "outputs/matrix/r0_gate.json",
+ "R0_status": "R0 FAIL - paper direction NOT REPRODUCED",
+ "aggregate_over_validated_runs": {
+  "byz_share_eligible_gt_half_ticks": {
+   "max": 2326.0,
+   "mean": 1733.4,
+   "median": 1716.0,
+   "min": 522.0,
+   "n": 10,
+   "sd": 523.6547208482576
+  },
+  "byz_share_eligible_max": {
+   "max": 0.9874213836477987,
+   "mean": 0.9264509694726641,
+   "median": 0.9710587147480352,
+   "min": 0.7307692307692307,
+   "n": 10,
+   "sd": 0.09410545540028897
+  },
+  "final15_mean_abs_error": {
+   "max": 0.24830006289308174,
+   "mean": 0.21509110651285143,
+   "median": 0.22736497383252818,
+   "min": 0.16018785440613026,
+   "n": 10,
+   "sd": 0.03359537159443426
+  },
+  "final_ref_height": {
+   "max": 220.0,
+   "mean": 185.3,
+   "median": 199.5,
+   "min": 77.0,
+   "n": 10,
+   "sd": 41.20962670703695
+  },
+  "final_size": {
+   "max": 55.0,
+   "mean": 20.7,
+   "median": 16.5,
+   "min": 2.0,
+   "n": 10,
+   "sd": 19.32787279207587
+  },
+  "m1_mean_abs_error": {
+   "max": 0.20909883450875355,
+   "mean": 0.1870240731495932,
+   "median": 0.19639804314870074,
+   "min": 0.1269761981393221,
+   "n": 10,
+   "sd": 0.025915865860600813
+  },
+  "m2_tpr": {
+   "max": 1.0,
+   "mean": 0.8231722070623384,
+   "median": 0.9345725515886014,
+   "min": 0.2777777777777778,
+   "n": 10,
+   "sd": 0.27937860477570176
+  },
+  "m3_fpr": {
+   "max": 0.9166666666666666,
+   "mean": 0.7666666666666667,
+   "median": 0.75,
+   "min": 0.6666666666666666,
+   "n": 10,
+   "sd": 0.08606629658238706
+  },
+  "m4_mean_swarm_size": {
+   "max": 57.316944444444445,
+   "mean": 42.631861111111114,
+   "median": 40.761111111111106,
+   "min": 28.703333333333333,
+   "n": 10,
+   "sd": 9.906735216077035
+  },
+  "m5_mean_byzantine_count": {
+   "max": 52.23555555555556,
+   "mean": 37.33394444444445,
+   "median": 35.68055555555556,
+   "min": 20.923333333333332,
+   "n": 10,
+   "sd": 10.751992966757449
+  },
+  "m6_robots_removed": {
+   "max": 319.0,
+   "mean": 173.1,
+   "median": 177.5,
+   "min": 31.0,
+   "n": 10,
+   "sd": 103.0463218385035
+  },
+  "max_size": {
+   "max": 173.0,
+   "mean": 107.9,
+   "median": 104.5,
+   "min": 53.0,
+   "n": 10,
+   "sd": 46.57717609874319
+  },
+  "n_reorgs": {
+   "max": 4758.0,
+   "mean": 2285.5,
+   "median": 2232.5,
+   "min": 283.0,
+   "n": 10,
+   "sd": 1744.4293081438157
+  }
+ },
+ "byz_share_eligible_gt_half_any_tick_runs": 10,
+ "engineering_validation": {
+  "full_resim_required": true,
+  "note": "engineering validation only; not evidence of paper fidelity or R0",
+  "runs_total": 10,
+  "runs_validated": 10
+ },
+ "out": "/workspace/swarm-r0-2026-11-07/outputs/matrix/exp2_naive_a10",
+ "stamp": "SEED-v0.1 cdc788b1996bd923d48a034b28f58ee728ce10d82924724c722b2b7be7e719f5"
+}

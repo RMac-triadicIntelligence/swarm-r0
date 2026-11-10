@@ -1,0 +1,223 @@
+{
+ "R0_note": "Engineering validation (replay/hash/invariant checks) is NOT R0. R0 = paper direction at alpha=10; computed result above.",
+ "R0_source": "outputs/matrix/r0_gate.json",
+ "R0_status": "R0 FAIL - paper direction NOT REPRODUCED",
+ "arm": "A",
+ "consequence": "R0 not established; no downstream (arm B-D) claims may rely on this harness",
+ "engineering_validation_all_conditions_ge10": true,
+ "harness": "swarm_r0.py arm=A version=0.2.0",
+ "pairs": {
+  "exp1_naive": {
+   "direction_matches_paper": false,
+   "fpr_a1": 0.29290681738496943,
+   "fpr_a10": 0.35098621405426,
+   "lower_fpr_a10": false,
+   "paired_by_seed_descriptive": {
+    "m1_mean_abs_error": {
+     "a10_higher": 6,
+     "a10_lower": 4,
+     "mean_diff_a10_minus_a1": 0.0032646107626384925,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 0.75390625,
+     "ties": 0
+    },
+    "m2_tpr": {
+     "a10_higher": 5,
+     "a10_lower": 5,
+     "mean_diff_a10_minus_a1": 0.025933031940707663,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 1.0,
+     "ties": 0
+    },
+    "m3_fpr": {
+     "a10_higher": 8,
+     "a10_lower": 2,
+     "mean_diff_a10_minus_a1": 0.05807939666929059,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 0.109375,
+     "ties": 0
+    }
+   },
+   "tpr_a1": 0.3619529242642997,
+   "tpr_a10": 0.38788595620500743,
+   "tpr_a10_comparable_or_higher": true
+  },
+  "exp1_smart": {
+   "direction_matches_paper": false,
+   "fpr_a1": 0.31314225298164156,
+   "fpr_a10": 0.32905747448751843,
+   "lower_fpr_a10": false,
+   "paired_by_seed_descriptive": {
+    "m1_mean_abs_error": {
+     "a10_higher": 3,
+     "a10_lower": 7,
+     "mean_diff_a10_minus_a1": -0.0055658084188255075,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 0.34375,
+     "ties": 0
+    },
+    "m2_tpr": {
+     "a10_higher": 4,
+     "a10_lower": 6,
+     "mean_diff_a10_minus_a1": 0.05240794010979265,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 0.75390625,
+     "ties": 0
+    },
+    "m3_fpr": {
+     "a10_higher": 7,
+     "a10_lower": 3,
+     "mean_diff_a10_minus_a1": 0.01591522150587694,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 0.34375,
+     "ties": 0
+    }
+   },
+   "tpr_a1": 0.2998863416876242,
+   "tpr_a10": 0.3522942817974169,
+   "tpr_a10_comparable_or_higher": true
+  },
+  "exp2_naive": {
+   "direction_matches_paper": true,
+   "fpr_a1": 0.8,
+   "fpr_a10": 0.7666666666666667,
+   "lower_fpr_a10": true,
+   "paired_by_seed_descriptive": {
+    "m1_mean_abs_error": {
+     "a10_higher": 4,
+     "a10_lower": 6,
+     "mean_diff_a10_minus_a1": 0.004619860381596149,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 0.75390625,
+     "ties": 0
+    },
+    "m2_tpr": {
+     "a10_higher": 4,
+     "a10_lower": 5,
+     "mean_diff_a10_minus_a1": 0.08601509192606895,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 1.0,
+     "ties": 1
+    },
+    "m3_fpr": {
+     "a10_higher": 1,
+     "a10_lower": 3,
+     "mean_diff_a10_minus_a1": -0.03333333333333334,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 0.625,
+     "ties": 6
+    }
+   },
+   "tpr_a1": 0.7371571151362695,
+   "tpr_a10": 0.8231722070623384,
+   "tpr_a10_comparable_or_higher": true
+  },
+  "exp2_smart": {
+   "direction_matches_paper": false,
+   "fpr_a1": 0.7333333333333334,
+   "fpr_a10": 0.7416666666666666,
+   "lower_fpr_a10": false,
+   "paired_by_seed_descriptive": {
+    "m1_mean_abs_error": {
+     "a10_higher": 3,
+     "a10_lower": 7,
+     "mean_diff_a10_minus_a1": 0.028587738074819836,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 0.34375,
+     "ties": 0
+    },
+    "m2_tpr": {
+     "a10_higher": 2,
+     "a10_lower": 7,
+     "mean_diff_a10_minus_a1": 0.15135438780510724,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 0.1796875,
+     "ties": 1
+    },
+    "m3_fpr": {
+     "a10_higher": 5,
+     "a10_lower": 5,
+     "mean_diff_a10_minus_a1": 0.00833333333333336,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 1.0,
+     "ties": 0
+    }
+   },
+   "tpr_a1": 0.8113343174565746,
+   "tpr_a10": 0.9626887052616817,
+   "tpr_a10_comparable_or_higher": true
+  },
+  "exp3_naive": {
+   "direction_matches_paper": false,
+   "fpr_a1": 0.4467753227759033,
+   "fpr_a10": 0.4502621369022405,
+   "lower_fpr_a10": false,
+   "paired_by_seed_descriptive": {
+    "m1_mean_abs_error": {
+     "a10_higher": 2,
+     "a10_lower": 8,
+     "mean_diff_a10_minus_a1": 0.00840446526687123,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 0.109375,
+     "ties": 0
+    },
+    "m2_tpr": {
+     "a10_higher": 3,
+     "a10_lower": 3,
+     "mean_diff_a10_minus_a1": 0.06256856298299569,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 1.0,
+     "ties": 4
+    },
+    "m3_fpr": {
+     "a10_higher": 5,
+     "a10_lower": 4,
+     "mean_diff_a10_minus_a1": 0.003486814126337229,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 1.0,
+     "ties": 1
+    }
+   },
+   "tpr_a1": 0.14911964785914364,
+   "tpr_a10": 0.21168821084213935,
+   "tpr_a10_comparable_or_higher": true
+  },
+  "exp3_smart": {
+   "direction_matches_paper": true,
+   "fpr_a1": 0.49036499877144335,
+   "fpr_a10": 0.45828458766543034,
+   "lower_fpr_a10": true,
+   "paired_by_seed_descriptive": {
+    "m1_mean_abs_error": {
+     "a10_higher": 6,
+     "a10_lower": 4,
+     "mean_diff_a10_minus_a1": 0.0011494829370740603,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 0.75390625,
+     "ties": 0
+    },
+    "m2_tpr": {
+     "a10_higher": 6,
+     "a10_lower": 3,
+     "mean_diff_a10_minus_a1": 0.21343129447605874,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 0.5078125,
+     "ties": 1
+    },
+    "m3_fpr": {
+     "a10_higher": 5,
+     "a10_lower": 4,
+     "mean_diff_a10_minus_a1": -0.032080411106013014,
+     "n_pairs": 10,
+     "sign_test_p_two_sided": 1.0,
+     "ties": 1
+    }
+   },
+   "tpr_a1": 0.20032418922079903,
+   "tpr_a10": 0.4137554836968578,
+   "tpr_a10_comparable_or_higher": true
+  }
+ },
+ "rule": "SEED s7 (relayed): alpha=10 must show lower mean FPR and comparable-or-higher mean TPR (>= alpha1 - 0.05, ASSUMPTION-16) vs alpha=1 in all 6 exp x byz pairs; >=10 engineering-validated runs per condition",
+ "stamp": "SEED-v0.1 cdc788b1996bd923d48a034b28f58ee728ce10d82924724c722b2b7be7e719f5"
+}

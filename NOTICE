@@ -1,0 +1,9 @@
+swarm_r0.py v0.2.0 — arm A DAO open-swarm harness
+Copyright 2026 Rusty Williams McMurray / Soulshine (Tulsa, OK)
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+Authored under Soulshine. Released for review.
+
+The source/ directory includes the public arXiv:2611.03975v1 paper (PDF, text,
+and API metadata), retained for provenance. Those files remain under their
+original terms and are not licensed by this NOTICE.

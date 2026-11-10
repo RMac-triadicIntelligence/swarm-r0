@@ -1,0 +1,1 @@
+{"annotated_files": 395, "R0_status": "R0 FAIL - paper direction NOT REPRODUCED", "R0_source": "outputs/matrix/r0_gate.json", "R0_note": "Engineering validation (replay/hash/invariant checks) is NOT R0. R0 = paper direction at alpha=10; computed result above."}

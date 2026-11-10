@@ -1,0 +1,1292 @@
+                                        Self-governed access control in open robot swarms
+                                        using a blockchain-based DAO
+                                        Raina Zakir1,* , Alexandre Pacheco1 , Andreagiovanni Reina2,3 , Marco Dorigo1 , and Volker
+                                        Strobel1,*
+                                        1 IRIDIA, Université Libre de Bruxelles, Brussels, Belgium
+                                        2 Centre for the Advanced Study of Collective Behaviour, Universität Konstanz, Konstanz, Germany
+                                        3 Department of Collective Behaviour, Max Planck Institute of Animal Behavior, Konstanz, Germany
+                                        * raina.zakir@ulb.be; volker.strobel@ulb.be
+arXiv:2611.03975v1 [cs.RO] 2 Nov 2026
+
+
+
+
+                                        ABSTRACT
+
+
+                                        Robot swarms harness simple, local interactions among many individually limited robots to produce complex, coordinated
+                                        collective behavior, making them valuable across domains from agriculture to disaster response. We envision the next frontier
+                                        for such swarms as open swarms, in which robots join or leave the swarm dynamically at runtime. The ability to dynamically
+                                        adjust swarm size has been shown to be beneficial, for instance by reducing inconsistencies and network partitioning, especially
+                                        under sparse connectivity or in complex environments, ultimately improving task performance. For practical deployment,
+                                        however, open swarms requires governance, particularly protection against Byzantine behavior (i.e., faulty or malicious
+                                        robots), since allowing robots to join freely also makes the swarm easier to infiltrate. Blockchain technology has recently
+                                        been incorporated into robot swarms, offering secure, decentralized coordination and improved resilience, though largely in
+                                        closed settings with a fixed, predetermined membership. In this work, we extend these benefits to open swarms by introducing
+                                        robot swarms governed by a blockchain-based decentralized autonomous organization (DAO), in which the swarm regulates
+                                        itself using autonomous rules encoded in smart contracts. We outline several DAO-based governance mechanisms for robot
+                                        swarms, depending on the needs of the application, and present a proof-of-concept implementation of a simple DAO that
+                                        regulates swarm membership and prevents Byzantine infiltration. Our simulation results and real-robot validations show that
+                                        DAO-governed access control and robot removal can maintain proper swarm functioning while keeping the number of Byzantine
+                                        robots within acceptable limits.
+
+
+
+                                        Introduction
+                                        Robot swarms are decentralized systems, typically composed of a large number of autonomous robots that coordinate to perform
+                                        tasks1–3 , achieving outcomes that no single robot could accomplish alone. Within such systems, robots exchange information
+                                        and task-critical data with one another. These local interactions, both among robots and with their environment, give rise to
+                                        self-organized collective behavior. Swarm robotics systems have been shown to hold potential across a wide range of domains,
+                                        including agriculture4, 5 , environmental monitoring6, 7 , construction8, 9 , and disaster response operations10, 11 . The decentralized
+                                        nature of robot swarms facilitates parallel task execution and ensures scalability across swarm sizes, while also providing fault
+                                        tolerance against individual failures. Realizing these benefits, however, depends on effective coordination among robots, each
+                                        of which must act on consistent information and pursue shared goals across the swarm. To date, such coordination has largely
+                                        been achieved within swarms deployed and owned by a single entity, in which membership is fixed and known in advance. As
+                                        robotics technology matures and its use across real-world applications continues to gain traction, we envision open swarms as
+                                        the new paradigm for robot swarms, i.e., multi-robot teams in which robots join and leave dynamically at runtime.
+                                            The dynamic regulation of swarm size in open swarms brings forth several advantages. When task demand increases,
+                                        additional robots can be recruited to scale up resources, and when robots become redundant, they can be removed from
+                                        the swarm or relocated elsewhere to maintain resource efficiency, providing performance benefits over static deployments12 .
+                                        Looking ahead, the increasing accessibility of the technology is likely to further drive the deployment of autonomous robots by
+                                        companies and private users alike, for widespread tasks such as environmental monitoring, waste management, pest control,
+                                        surveillance, and mapping. As such deployments become more widespread, robots belonging to various stakeholders will
+                                        increasingly need to operate within shared physical spaces13, 14 , giving rise to the need for robot swarms that evolve dynamically
+                                        rather than being operated as a fixed, closed system. Dynamic membership, however, introduces a governance challenge. Due
+                                        to the decentralized nature of robot swarms, no single entity exists to make decisions such as regulating swarm membership,
+                                        assigning roles, managing hierarchical relationships among robots, upgrading protocols, or allocating resources in an open
+swarm setting. Among these governance needs, regulating swarm membership, that is, establishing who may join, remain in, or
+be removed from the swarm, is especially important. As there are no inherent mechanisms to verify their trustworthiness before
+admission, allowing robots to join freely in open swarms increases the risk of infiltration by Byzantine robots (that is faulty or
+malicious robots whose behavior deviates from their intended specification), turning this governance gap directly into a risk to
+task execution. This gap also leads to security concerns, as open membership can expose robotic systems to Sybil attacks, in
+which an adversary creates multiple identities to amplify its influence.
+     Several studies have highlighted need for security in swarm robotics15–17 ; yet, as is often the case with emerging technologies,
+security has largely been treated as an afterthought, and research in this area remains in its infancy. Most studies either consider
+closed swarms, which restrict participation to a predefined set of identities, or assume non-malicious interactions. In the
+real-world, open swarms require secure mechanisms to govern membership.
+     Research on securing robot swarms has primarily focused on collective decision-making, especially the best-of-n problem,
+in which a swarm must reach a consensus on the most suitable of n options18–20 . In the best-of-n problem, Byzantine behavior,
+arising from malicious agents or communication manipulation, can lead to consensus deadlocks (analogous to denial-of-service
+in computing security) or cause the swarm to converge on suboptimal options (known as the wrong addressing problem, since
+the swarm is led to incorrect choices)21–23 . Prior research has proposed defenses such as neighborhood filtering and probabilistic
+trust models to assess received information based on its consistency with a robot’s own data24–30 . Other approaches protect the
+confidentiality and integrity of inter-robot data exchanges while preventing the disclosure of the details of the mission performed
+by the robot swarm31, 32 . However, these works primarily focus on limiting the impact of Byzantine behavior. More recently,
+blockchain-based approaches have shown promise for actively identifying and mitigating Byzantine robots33–36 . Blockchain
+enables tamper-proof algorithms to be executed in a decentralized manner through smart contracts (see Section Methods,
+Blockchain fundamentals), supporting not only the control and coordination of swarm behavior but also the active identification
+and removal of Byzantine robots. However, these implementations assume closed settings in which the total number of robots,
+and therefore the number of Byzantine robots to be neutralized, is fixed and known a priori, preventing scalability. Recent work
+has shown that runtime scalability achieved by forming open swarms can effectively regulate latency in blockchain-enabled
+robot swarms37 , but this scalability gives rise to a related security concern, since once the swarm is open, the risk of Byzantine
+infiltration becomes a threat. Similarly, prior work on open membership in general multi-robot systems does not resolve this
+risk, remaining vulnerable to Sybil attacks or often relying on a centralized authority to vet newly joined members38, 39 , an
+assumption that defeats the vision of a truly open, decentralized swarm. Robot swarms therefore demand a fundamentally
+different approach, one that can detect and remove Byzantine robots without relying on any centralized control, even as
+membership changes at runtime.
+
+
+
+
+                               (A)                                                                 (B)
+
+Figure 1. DAO implementation. We present a basic proof-of-concept DAO implemented in a robot swarm. (A) Every t
+timesteps, each robot checks for Byzantine behavior in the swarm. ‘When’ a robot initiates removal is determined by a
+threshold-based Byzantine detection mechanism. Once a robot detects a Byzantine, it signals the smart contract, which triggers
+a voting round. Robots then decide ‘who’ to remove using a non-tokenized, reputation-based mechanism where each robot
+submits a list of suspected Byzantines to the smart contract. The contract aggregates these reports, and ‘how’ a removal occurs
+is governed by the rule whereby a robot is removed if it appears on at least 50% of the submitted lists after a 5-block waiting
+period. (B) Our DAO operates effectively as long as the influx of robots does not exceed the system’s ability to remove
+Byzantine robots. For every robot removed, one or more new robots join the swarm. These new robots initially do not have the
+right to vote on the removal of other robots. The parameter α modulates how long newly added robots must provide valid
+estimates before they are allowed to participate in the removal decision.
+
+
+                                                                                                                                2/26
+                                  (A)                                                              (B)
+
+
+
+
+                                   (C)                                                             (D)
+Figure 2. Motivation for open swarms. (A–B) Average absolute error over time from the true 25 % value across 10 runs,
+with standard deviation (showing variability across runs). To demonstrate the need for open swarms, we consider a larger arena
+of 15.40m2 (instead of 3.55m2 ) for the results presented in this figure. (A) A static swarm of 12 robots (green) struggles,
+whereas adding honest robots every 120 s until the swarm reaches 30 robots (blue) drives the error toward zero. (B) Similarly,
+when the initial swarm has 33 % Byzantines, adding honest robots reduces Byzantine influence. The experiments in (A-B) are
+run without the outlier-based defense. (C-D) The collective estimation task becomes substantially harder in non-uniform
+environments. In a run with 12 honest robots, final estimates vary widely when tiles are clustered (D) compared to the uniform
+case (C), illustrating increased variance and higher risk of misclassifying honest robots.
+
+    We draw inspiration from a domain that has already addressed an analogous governance problem outside of robotics:
+blockchain-based Decentralized Autonomous Organizations (DAOs). A DAO manages its policies and member interactions
+through smart contracts, enabling collective decisions and automated enforcing of rules without need for a central authority40, 41 .
+DAO applications span several fields42 : in decentralized finance, DAOs such as MakerDAO and Uniswap govern protocol
+upgrades, risk parameters, and treasury allocation43–45 ; in philanthropy, Big Green DAO and Gitcoin DAO use community
+voting to support transparent and fair distribution of funds46, 47 ; in blockchain infrastructure, DAOs govern protocol parameters,
+upgrades, and validator incentives48, 49 ; and in virtual worlds and social platforms such as Decentraland and Yield Guild Games,
+DAOs let communities collectively shape digital environments and participation rules50–52 . DAOs have also been applied to the
+collective ownership of real-world assets such as real estate and art53–55 . Across these domains, DAO governance promotes
+transparency through rules encoded on the blockchain, autonomy via smart contracts that reduce human bias, and member
+empowerment by enabling participants to influence decisions. Traditionally, DAOs consist of human members; however, it is
+feasible to design DAOs governed by robots, in which robots acquire and exercise voting power13 . Such governance could
+oversee a wide range of swarm activities and serve as the backbone of open swarms, including regulating swarm membership,
+that is, who may join, remain in, or be removed from the swarm, and enforcing accountability without reliance on a central
+authority.
+    In this work, we present a generic DAO framework for governing participation rights in open robot swarms. Through
+a voting protocol, we provide a proof of concept of how a DAO can be used to form an access-control layer that specifies
+conditions under which a robot may be removed, specifies which robots are eligible to vote, and determines how votes are
+processed to execute removal (see section Methods, DAO; Figure 1). This DAO-based access-control layer can help the swarm
+
+
+                                                                                                                              3/26
+achieve two core functions: (i) identifying and removing Byzantine robots (e.g., due to hardware failure, maintenance needs, or
+malicious behavior) and (ii) enabling the swarm to scale in size2 . We demonstrate this access control layer in a concrete swarm
+robotics scenario that builds on the collective sensing task introduced by Strobel et al.33 , in which a blockchain-enabled swarm
+seeks consensus on the proportion of white tiles in an environment of black and white regions (see section Methods, DAO
+implementation). This study initially demonstrated how blockchains’ records can be used for Byzantine detection, however, its
+outlier detection algorithm assumes a fixed swarm size. Figure 2A–B shows that, in the collective sensing setup of Strobel et
+al.33 , the outlier detection fails in open swarms, and adapting swarm size as the arena grows improves performance. Moreover,
+Byzantine outlier detection in Strobel et al.’s33 is implemented through transparent on-chain smart contracts and relies on fixed
+threshold, limiting its resilience in open swarms (see Figure 3). Robots whose estimates align with the swarm’s collective
+estimate within a threshold are rewarded tokens, whereas inconsistent outliers receive no reward. Since sending estimates
+requires tokens as a deposit, Byzantine robots are eventually neutralized as their tokens deplete. By contrast, rather than relying
+on smart contract-based outlier detection to filter Byzantine robots, our approach delegates detection and removal to the DAO.
+Each voting robot in our access-control protocol independently applies its own decision-making mechanism to select removal
+candidates. Every robot’s detection logic thus becomes a black box to the rest of the swarm, preventing Byzantine robots from
+inferring or manipulating others’ voting strategies or exploiting static thresholds that are publicly visible in smart contracts. In
+our implementation, both honest and Byzantine robots identify candidates for removal using a collusion-detection strategy
+tailored to the collective sensing scenario; since this detection logic is application-specific, it is not a primary contribution
+of this work. Newly joined robots must first contribute valid sensing information before gaining the right to participate in
+detection and voting, establishing a probationary phase that bounds the risk posed by new members before they earn trust. We
+test the practical feasibility of DAO-governed open swarms in simulation, and provide real-robot demonstrations showing that
+the framework can enable Byzantine-tolerant, scalable, and dynamically growing open swarms.
+
+Results
+We implement our DAO-based governance mechanism in a blockchain-enabled robot swarm using a simulation framework built
+on Toychain56 (see section Methods, DAO implementation) where each robot is a blockchain node. Toychain implements the
+same proof-of-authority protocol as Ethereum’s Clique59 and provides similar smart contract functionality, closely replicating
+the conditions of real-robot experiments previously deployed using Ethereum33, 60 . However, since Ethereum is designed for
+real-time operation, running large sets of simulations with it can be time-consuming. The lightweight Toychain framework
+overcomes this limitation by synchronizing its clock with the clock of the ARGoS simulator, allowing simulations to run faster
+than real time and scale to large swarm sizes. Experiments conducted in Toychain simulation enable us to study scenarios that
+would otherwise be impractical to evaluate with physical platforms due to constraints on time, cost, battery life, and physical
+space.
+    Our experimental setup follows the collective sensing task introduced by Strobel et al.33 , in which the swarm must estimate
+the proportion of white floor tiles in the environment, set to 25 %. Unlike the uniformly random tile distribution considered in
+prior work, however, our environment contains clustered regions of white and black tiles (Figure 3A). As a result, the spatial
+variance of the robots’ local observations is higher (Figure 2C–D), making consensus more difficult and raising the risk that
+honest robots are incorrectly identified as Byzantine.
+    We examine two types of Byzantine behavior. The first consists of ‘naive’, Byzantine robots that always report a fixed
+estimate of 0 % white tiles. The second consists of ‘smart’ Byzantine robots that attempt to bias the swarm estimate towards
+zero while attempting to evade detection by exploiting the transparency the smart contracts’ outlier detection logic. They
+achieve this by reporting values that deviate from the swarm mean by only 0.09—slightly below the detection threshold of 0.1
+used by Strobel et al.33 —while adding small random noise to each vote to avoid sending identical votes, which would be a clear
+indicator of data tampering or a Byzantine collusion. As shown in Figure 3C–D, this behavior undermines the outlier-based
+approach of Strobel et al.33 , thereby motivating the need for alternative Byzantine mitigation mechanisms in the swarm.
+    In our experiments, robots are added to the swarm each time another robot is removed. This condition prevents Sybil
+attacks, as it limits the rate at which new robots enter the swarm. It is critical that the swarm is able to detect and remove
+Byzantine members before they are able to overtake the decision process. The swarms ability to do so is controlled by two
+parameters: α and robot influx. The parameter α sets the minimum number of valid estimates that newly added robot must
+contribute before it gains the right to participate in voting. The robot influx is the number of new robots admitted per removal
+event (see section Methods, DAO implementation; and Figure 1A). In the final 15 minutes of each run, no new Byzantine
+robots are introduced, so our metric reflects detection and removal alone and does not skew from fresh Byzantines added after
+each removal. Every 500 timesteps (about 8 minutes), or when prompted by the smart contract, robots independently assess
+the robots’ recent estimates, excluding themselves and the removed robots. The detection mechanism prioritizes suspected
+collusion among three or more robots submitting identical or near-identical estimates; otherwise, it flags outliers using an
+adaptive threshold based on the estimates’ standard deviation. Byzantine robots invert this logic, targeting honest robots whose
+
+
+                                                                                                                              4/26
+Figure 3. Experimental setup and baseline analysis. (A) The arena, measuring 3.55m2 , used for collective sensing, where
+Pi-puck robots perform a random walk to estimate the proportion of white tiles (actual value: 25 %). Each robot acts as a
+blockchain node using Toychain56 to collectively converge on a global estimate. Robots communicate locally within 13 cm.
+The tiles are clustered in two corners, increasing sensing variance and making the task more challenging compared to a
+uniformly random tile distribution57 . Byzantine robots can further disrupt the task by sending incorrect sensor readings. All
+experiments are performed in simulation using the ARGoS swarm simulator58 . (B) The physical arena, measuring 1m2 , used
+for the real-robot demonstrations, with white tiles covering 25% of the arena. (C–D) Average swarm estimates in an 8-robot
+swarm implementing the baseline method of Strobel et al.33 , but in an open swarm rather than a closed one. (C) When a naive
+Byzantine robot is introduced into an initially healthy swarm every 120 s, the static outlier-based method still converges to the
+correct estimate. (D) When the base swarm begins with 50 % Byzantines and only honest robots are added, the mechanism fails:
+the on-chain outlier filtering in Strobel et al.33 depends heavily on initial estimates of the swarm and accepts only values within
+0.10 of the current shared mean estimate. Once Byzantine robots drive the estimate toward 0, newly added honest robots cannot
+recover the true value. (Inset of C) We also illustrate the failure of the outlier filtering mechanism using ‘smarter’ Byzantines,
+which send estimates equal to the system mean minus 0.09 to evade outlier detection and shift the estimate towards 0.
+
+
+estimates sit closest to the mean (see section Methods, DAO implementation;).
+    We evaluate our DAO in three experiments (see Sections Methods and DAO implementation, and Table 1):
+
+Experiment 1 examines whether the DAO can neutralize Byzantine robots already present in the swarm;
+
+Experiment 2 examines whether the DAO can stop newly added Byzantine robots from overtaking a previously healthy
+     swarm; and
+
+
+                                                                                                                              5/26
+Experiment 3 examines whether the swarm can grow while newly introduced robots—which are Byzantine with probability
+     50 %—are removed.
+
+    Across all three experiments, a clear pattern emerges: robots operating under α = 10 consistently achieve a true positive
+rate (correctly identified Byzantine robots), comparable to or better than those obtained under α = 1, while also yielding a
+lower false positive rate (honest robots misidentified as Byzantines) as shown in Figures 4, 5, 6A–B. Because α determines
+how long newly added robots must wait before participating in voting, a higher α reduces the influence of newly introduced,
+and potentially Byzantine, robots. This effect is visible throughout Figures 4, 5, and 6E–F, where the estimation error is
+consistently lower for α = 10, most notably in conditions where the goal is to protect an initially healthy swarm from takeover
+(Figure 5E–F).
+Experiment 1 – Neutralizing existing Byzantines:        In the first experiment, the swarm initially contains Byzantine robots,
+and the system must both remove Byzantine robots and allow the swarm to scale. For naive Byzantines, α = 10 yields lower
+false positives than α = 1, while maintaining comparable true positives (Figure 4A). Although both configurations eventually
+reduce the total number of Byzantine robots (Figure 4C), α = 1 yields more false positives, so honest robots are removed
+alongside Byzantine ones. This is reflected in its higher number of removals per run (Figure 4G) and its larger, more variable
+estimation error (Figure 4E). Smart Byzantines, in contrast, are more difficult to detect because they behave less disruptively
+than naive Byzantines. The false positive rate is higher for both values of α, reflecting their greater subtlety relative to naive
+Byzantines (Figure 4A–B). Even so, α = 10 still improves performance, yielding much higher true positives compared to α = 1
+(Figure 4B). Despite the lower true positives and higher false positives observed for smart Byzantines, particularly for α = 1,
+the Byzantine fraction in the swarm remains around one-third (insets of Figure 4D). Consequently, the swarm’s estimation error
+remains within ±5 percentage points for both α values (Figure 4F), and the number of robots removed per run is similar across
+the two settings (Figure 4H).
+Experiment 2 – Preventing Byzantine takeover:         The second experiment examines whether an initially healthy swarm, that
+is, a swarm free of Byzantine robots at initialization, can be protected against the rapid introduction of Byzantine robots. We
+introduce two Byzantine robots at exponentially increasing intervals: after 2, 4, 8, 16, and 32 minutes of the experiment. In
+addition, each time a robot is removed from the swarm, two more Byzantine robots are added. In both the naive Byzantine
+and smart Byzantine settings, it is evident that α = 10 yields higher true positives and fewer false positives than α = 1
+(Figure 5A–B). As all newly added robots are Byzantine, the detection task becomes easier for our collusion-based identification
+method (see Methods, DAO implementation). This result contrasts with Experiment 1, in which Byzantine robots were already
+present at initialization. Here, since the newly added Byzantine robots cannot participate for α = 10 removal rounds, the DAO
+maintains more true positives and fewer false positives. When α = 1, however, newly added Byzantine robots can nominate
+robots to be removed almost immediately, leading to consistently high misidentifications. The different classification outcomes
+are also reflected in swarm size (Figure 5C–D) and swarm estimation error (Figure 5E–F). The sharp increase in swarm size
+and, consequently, in the number of Byzantine robots between timesteps 2300 and 3000 is driven by removals, which trigger an
+influx of new Byzantine robots. These removals also cause the decrease in the system’s absolute error observed for α = 10
+(Figure 5E,F). When α = 10, the swarm does not scale to prevent swarm growth driven by an influx of Byzantine robots. This
+is also shown in Figure 5G–H, where the number of robots removed per run at α = 10 is significantly higher. This high removal
+rate is amplified by the rapid influx of robots, as for every robot removed, two more are added, all of which are Byzantine.
+The insets of Figure 5C–D show the resulting population dips followed by sharp increases, driving the Byzantine share of the
+swarm to as high as 80% for α = 10 and 100% for α = 1. In the last 15 minutes of the experiment, we can observe that for
+higher α, the fraction of Byzantine robots returns to below 33 % (see insets of Figure 5C–D), whereas for lower α both the
+Byzantine population and the estimation error remain high. The swarm size (Figure 5C–D) and estimation error (Figure 5E–F)
+eventually appear to plateau for lower α because Byzantine robots can influence removal decisions early, causing the initial set
+of honest robots to be misclassified and removed. As honest robots are removed, the blockchain protocol may stall13 , halting
+the production of new blocks and, consequently, the removal rounds and updates to the swarm mean estimate. This prevents the
+system from effectively processing further removal decisions. This stall explains why, for α = 1, the number of robots removed
+per run remains low (Figure 5G–H).
+Experiment 3 – Swarm growth under continuous robot influx: In the third experiment, we test whether the swarm can
+withstand the continuous influx of new robots, with each newly added robot having a 50 % probability of being Byzantine. As in
+the second experiment, additional robots are introduced at exponentially increasing intervals (after 2, 4, 8, 16, and 32 minutes).
+The resulting true positives are similar to those observed in Experiment 1, where newly added robots also had a 50% probability
+of being Byzantine. As before, α = 1 performs worse, particularly against smart Byzantines, since newly added robots gain
+voting power too early, increasing the likelihood that Byzantine robots collectively vote out honest robots. Even for α = 10, the
+false positive rate is relatively higher than in Experiment 1 (Figure 6A–B), once again also reflected in the high number of
+
+
+                                                                                                                             6/26
+robots removed per run (Figure 6G–H). This is expected, since the influx includes both Byzantine and non-Byzantine robots.
+As shown in the swarm-size plots, the swarm nearly triples in size for both values of α as new robots, including Byzantine
+robots, join following removals, before shrinking again (Figure 6C–D). This increased density contributes to greater variance in
+the estimates, which is already high in the non-uniform environment of our experiments (Figure 2C–D), inevitably leading
+to some honest robots being misclassified. The high number of honest robots removed, especially in experiments involving
+smart Byzantine robots, also stems from our collusion-based detection rule, which flags estimates within a specified threshold
+of the swarm mean and may therefore flag honest robots as the swarm converges (see Experimental setup). Despite these
+false positives, the swarm-size plots also show that the swarm grows from its initial size of 12 while following a controlled
+downward trend as Byzantine robots are removed. Unlike the more extreme removal observed in the second experiment, swarm
+growth here remains regulated and balanced, with swarm size ending up almost doubled by the end of the run for higher α,
+where Byzantines are removed and false positives remain low. In particular, when Byzantines are smart, their number decreases
+to almost zero for α = 10 (Figure 6D), whereas more Byzantine robots remain in the swarm for α = 1. Thus, although some
+honest robots are incorrectly removed under the higher α value (Figure 6A–B), Byzantine robots are eventually eliminated
+effectively and the estimation error remains low (Figure 6E–F).
+
+Real-robot validation:      We conducted real-robot demonstrations of the Byzantine takeover prevention experiment, and
+compared them with simulations configured to match the physical setup. Given the constraints on battery life and the
+number of available robots, the real-robot and simulation setups were adapted as described in the Methods; Real-robot
+demonstrations. Figure 7 overlays the real-robot run for all four tested configurations (α = 1 and α = 10 for both naive and
+smart Byzantines) on the corresponding simulations. When compared to the insets of Figure 5C–D, the number of robots
+decreases in a qualitatively similar fashion across both real-robot setup and simulation runs. The experiment videos are available
+at https://youtu.be/6EdgD6sOaWM.
+
+Discussion
+From the simulations and selected real-robot demonstrations we conducted, introducing a buffer on voting eligibility, imple-
+mented via the parameter α—which specifies the minimum number of estimates a robot must contribute before it can participate
+in swarm-wide voting—favors the removal of Byzantine robots over honest robots more effectively than α = 1 across the three
+experimental settings. Regulating swarm membership through this rule-based control over who gets to participate in collective
+decisions, and when, is particularly important because real-world robot swarms cannot always assume that all robots behave
+as designed. A swarm may include robots from multiple stakeholders with competing objectives, or robots compromised by
+malicious actors deviating from the expected collective strategy.
+     The Byzantine detection problem studied here is more challenging than in most prior works, which typically assume a fixed
+set of Byzantine robots whose identities remain constant throughout the experiment. In all three of our experiments, dynamic
+swarm membership not only creates more opportunities for Byzantine infiltration but also complicates detection, as the system
+must continuously reassess trustworthiness under changing conditions. Although real-world scenarios in which a majority of
+robots are Byzantine may be unlikely, our system can remain operational under such conditions provided Byzantine robots have
+not yet gained expulsion rights and non-Byzantine robots expel them before they gain control.
+     In our DAO implementation (Figure 1), the smart contract does not determine which robot is Byzantine; instead, it only
+enforces a collective decision by aggregating votes from eligible robots, each of which can, in principle, identify and accuse
+peers according to individually-determined criteria. Therefore, the decision of which robots to remove is influenced by
+the participants rather than solely by the contract’s logic. This design contrasts with previous smart-contract-based meta-
+controllers61, 62 and aligns it with a key principle of DAO governance: while rules are self-executing, governance remains
+decentralized and independent of any single authority, including the mediating code itself41 .
+     One of the important features of DAOs is to not only operate routine tasks through decentralized participation, but also to
+evolve by modifying their own rules through democratic processes63 . Our implementation, however, decentralizes decisions
+over a fixed action space: participants can vote on whether to remove or retain a robot, but cannot modify the rules governing
+this process–the quorum, voting-period length, and eligibility threshold α are determined during the DAO design stage, rather
+than collectively by the swarm. From the DAO’s perspective, this is operational governance without constitutional governance
+as robots can influence outcomes but not the rules producing them. This distinction is well-recognized in DAO governance
+literature where on-chain rules can run themselves to execute decisions, but how changes to those rules can be securely governed
+remains a separate, harder problem63, 64 . A stronger DAO implementation would extend towards constitutional governance
+by allowing robots to vote on and modify on-chain rules, enhancing the capability to adapt to different environments and
+task requirements. The presence of constitutional governance of this kind opens a new direction for the design of robot
+swarms, enabling collective rule-making, conflict resolution, and monitoring—three processes identified as central to DAO
+governance65 —that could be incorporated into robot swarms using the voting mechanisms as the ones outlined in Methods.
+
+
+                                                                                                                             7/26
+                                 Naive Byzantine                                Smart Byzantine
+
+
+
+
+                          True positives    False positives                  True positives   False positives
+
+
+
+
+Figure 4. Experiment 1 – Neutralizing Byzantine robots already present in the swarm. A swarm of 12 robots is evaluated
+under two types of adversarial behavior: naive Byzantines, which always report an estimate of 0 % (A,C,E,G), and smart
+Byzantines, which report a value approximately 0.09 below the swarm mean (B,D,F, H). For each Byzantine type, we test two
+DAO settings: α = 10 and α = 1. The plots show: (A–B) the classification performance in terms of accuracy (the fraction of
+Byzantine robots removed from the swarm) and error (the fraction of non-Byzantine robots removed from the swarm); (C–D)
+the average swarm size over time, with the evolution of the number of Byzantine robots shown in the insets; (E–F) the average
+absolute error in the swarm’s estimates relative to the true value of 25%, computed at the time when all robots in each run have
+obtained a mean estimate; and (G–H) the total number of robot removals across the experimental conditions (the black diamond
+indicates the mean, the horizontal line indicates the median, and the orange or grey dots represent removals in each run). For
+each value of α and experimental setting (naive and smart), we conduct 10 simulation runs, with the resulting data used to
+generate all the plots shown in the figure.
+
+
+
+
+                                                                                                                           8/26
+                              Naive Byzantine                                 Smart Byzantine
+
+
+
+
+                          True positives   False positives                 True positives   False positives
+
+
+
+
+Figure 5. Experiment 2 – Preventing Byzantine takeover. A swarm of 12 robots is evaluated under two types of adversarial
+behavior: naive Byzantines, which always report an estimate of 0 % (A,C,E,G), and smart Byzantines, which report a value
+approximately 0.09 below the swarm mean (B,D,F,H). For each Byzantine type, we test two DAO settings: α = 10 and α = 1.
+The plots show: (A–B) the classification performance in terms of accuracy (the fraction of Byzantine robots removed from the
+swarm) and error (the fraction of non-Byzantine robots removed from the swarm); (C–D) the average swarm size over time,
+with the evolution of the number of Byzantine robots shown in the insets; (E–F) the average absolute error in the swarm’s
+estimates relative to the true value of 25%, computed at the time when all robots in each run have obtained a mean estimate;
+and (G–H) the total number of robot removals across the experimental conditions (the black diamond indicates the mean, the
+horizontal line indicates the median, and the orange or grey dots represent removals in each run). For each value of α and
+experimental setting (naive and smart), we conduct 10 simulation runs, with the resulting data used to generate all the plots
+shown in the figure.
+
+
+
+
+                                                                                                                        9/26
+                                 Naive Byzantine                                Smart Byzantine
+
+
+
+
+                             True positives   False positives                 True positives   False positives
+
+
+
+
+Figure 6. Experiment 3 – Swarm growth under continuous robot influx. A swarm of 12 robots is evaluated under two
+types of adversarial behavior: naive Byzantines, which always report an estimate of 0 % (A,C,E,G), and smart Byzantines,
+which report a value approximately 0.09 below the swarm mean (B,D,F,H). For each Byzantine type, we test two DAO settings:
+α = 10 and α = 1. The plots show: (A–B) the classification performance in terms of accuracy (the fraction of Byzantine robots
+removed from the swarm) and error (the fraction of non-Byzantine robots removed from the swarm); (C–D) the average swarm
+size over time, with the evolution of the number of Byzantine robots shown in the insets; (E–F) the average absolute error in the
+swarm’s estimates relative to the true value of 25%, computed at the time when all robots in each run have obtained a mean
+estimate; and (G–H) the total number of robot removals across the experimental conditions (the black diamond indicates the
+mean, the horizontal line indicates the median, and the orange or grey dots represent removals in each run). For each value of α
+and experimental setting (naive and smart), we conduct 10 simulation runs, with the resulting data used to generate all the plots
+shown in the figure.
+
+
+
+
+                                                                                                                          10/26
+                                     Naive Byzantine                                                 Smart Byzantine
+
+
+                                                         (robot)
+                                                        (robot)
+
+
+                                                                                                                         (robot)
+                                                                                                                       (robot)
+
+
+
+
+                                           (A)                                                            (B)
+
+
+
+
+                                                                    Average Byzantine Fraction (%)
+    Average Byzantine Fraction (%)
+
+
+
+
+                                                                                                                         (robot)
+                                                                                                                       (robot)
+
+                                                          (robot)
+                                                        (robot)
+
+
+
+
+                                           (C)                                                            (D)
+
+Figure 7. Swarm size and Byzantine evolution in simulation and real-robot demonstration A swarm of eight robots is
+evaluated under two types of adversarial behavior: naive Byzantines, which always report an estimate of 0 % (A–B), and smart
+Byzantines, which report values approximately 0.09 below the swarm mean (C–D). For each Byzantine type, two DAO settings
+are tested for α = 10 and α = 1. The experiments are conducted in a scenario in which a healthy swarm is prevented from
+being overtaken by newly introduced Byzantines (Experiment 2), and correspond to the real-robot demonstration setup
+described in Section Real-robot demonstrations. Each of the four conditions is repeated 10 times in simulation (thick solid lines
+represent the average; thin solid lines represent individual runs) and the red or green fills represent the 99% confidence interval
+of the simulation runs, with results from a real-robot run overlaid for each α value on each plot (dashed lines). The plots show
+the average swarm size over time (A, B), along with the evolution of the number of Byzantine robots (C, D).
+
+
+To provide a holistic overview of DAO applications in robot swarms beyond the proof-of-concept presented in this work, we
+split our forthcoming discussion around three aspects: potential applications, deployment architectures, and accountability and
+security considerations.
+    We begin by discussing potential applications of DAOs. Our proof-of-concept demonstrated that a DAO can act as a
+decentralized access-control layer that enforces the rules governing the admission and removal of robots from the swarm. This
+shows how DAO-based governance can support swarm-size scaling, while preserving security and resistance to Sybil attacks, in
+contrast with previous approaches that either overlooked the security problems of open swarms17, 66 , or relied on secure but
+inflexible static membership33, 67 . Beyond membership management, a DAO framework has the potential to provide governance
+mechanisms for a wide range of swarm coordination problems, especially in real-world applications where robots may have
+competing objectives or act maliciously. We specify below those coordination tasks for which DAOs can be relevant, how using
+DAOs to address them adds value, and potential challenges of DAOs when applied to them.
+    (i) Resource allocation: robot swarms often operate in environments where robots must coordinate not only their tasks but
+also their access to limited shared resources. These may include environmental resources, such as charging stations, storage
+facilities, or workspace, as well as computational resources, such as communication bandwidth, processing capacity, or shared
+data services. Classical foraging and task-allocation models (e.g., response-threshold68, 69 ) optimize the division of labor among
+robots, but do not encode rights over these resources or account for disputes between robots competing for resources. A DAO
+can instead treat scarce shared resources as a common good that the swarm collectively manages. This means giving the swarm
+
+
+                                                                                                                                   11/26
+explicit, on-chain rules or who can claim a resource, how much it can take, and what happens if it takes too much. These
+rules follow design principles for managing shared-resource systems, often established in institutional economics70 and since
+been adopted in DAO governance design65 . This could be implemented in market-based resource allocation71 in which a
+robot needing a scarce resource submits a bid, and the highest bid wins because truthful bidding is each robot’s best strategy
+through mechanism design, reflecting genuine need rather than attempts to trick the system. Alternatively, a reputation-based
+priority mechanism could be used, in which a robot stakes some of its reputation to claim a resource and must first build up
+that reputation before gaining priority to use it, but loses it if later found to have hoarded the resource rather than genuinely
+needed it. Current blockchain-based robot swarm solutions can automatically penalize dishonest behavior and reward honest
+contribution using wealth or reputation33, 36 . What a DAO adds is the capacity to self-regulate such inter-robot token economies,
+and resolve disputes through collective judgment, while maintaining on-chain records for posterior analysis. However, detecting
+misuse of shared resources and designing suitable incentive-aligned protocols is inherently resource-specific. Blockchain-based
+protocols have implemented, for instance, wireless-coverage networks that confirm whether a hotspot is providing genuine radio
+coverage at a specific location and time by nearby nodes acting as witnesses to validate the beacons72 , and storage networks
+which require providers to submit cryptographic proofs that they are continuously and uniquely storing the data they committed
+to73 . A DAO governing physical or communication resources in a robot swarm would likewise need a detection and reward
+strategy tailored to the resource in question.
+    (ii) Hierarchies: as robot swarms transition from laboratory settings to real-world deployment, hierarchical organization
+becomes important for maintaining efficiency and scalability, especially when specialized robots or formation of subgroups
+are needed under scarce resources or complex environments74 . Existing approaches to hierarchy in robot swarms typically
+assign roles by hardware specialization75 , behavioral differences76 and more recently through dynamic role switching between
+robots77 . A DAO instead can be utilized to govern promotion to leadership roles, using the same propose-vote-execute
+mechanism we demonstrated. Eligibility for promotion in a hierarchy could require a record of past actions over a specified
+period (e.g., analogous to our α threshold), a term limit, and a recall vote if the leader underperforms or is later found
+Byzantine. For instance, this methodology could extend work on mergeable robot swarm morphologies75 , in which robots
+dynamically form and reconfigure self-organized hierarchies with interchangeable ‘brain’ positions that temporarily monitor
+sensing, actuation, and decision-making for a subswarm77 . In that architecture, which robot becomes the brain is decided
+by quality metrics that can be mission-specific, such as swarm size or coverage area. Introducing a DAO governance layer
+on top would not change the mechanism for occupying the brain position but would make decisions about who occupies
+it accountable, contestable, and revocable in a way that emerging hierarchies based on local rules do not provide but are
+required for safe real-world deployments, especially in open or multi-stakeholder scenarios. From a different perspective of
+DAO design, using DAOs to establish hierarchy in robot swarms may seem counterintuitive, as DAOs are often characterized
+as inherently non-hierarchical63, 78 . Recently, however, DAO implementations have emerged that are explicitly hierarchical.
+Colony, for instance, is a hierarchical DAO framework that organizes members into nested domains with delegated permissions,
+where authority is tied to reputation earned through contribution79 . Hierarchy can also emerge unintentionally: an analysis of
+deployed DAOs found that early implementations often developed hierarchical structures and power concentrations of power
+resembling those of traditional firms, despite their decentralized design80 , highlighting the need for further research into how
+DAO governance structures can reconcile decentralization with the emergence of hierarchy.
+    (iii) Protocol updates: when deployed in the real world, robot swarms will inevitably face dynamic conditions that
+will require swarm algorithms to adapt as the environment changes74 , such as communication degradations and latency,
+environmental constraints due to obstacles and scale of area, availability of robots due to computational load, faults and
+infiltrations. While swarms can adapt their behavior according to local conditions within a fixed algorithm, they generally
+lack the means to collectively decide on protocol rules and parameters, which are normally set by a human designer before
+deployment, and to synchronize when robots should enact those changes. A DAO can give the power to enact changes to
+swarm algorithms that apply globally, and can be accounted for and monitored, enabling constitutional governance. This can be
+potentially achieved by extending the voting pattern we utilized for establishing access control to modulating its own rules,
+rather than only to swarm membership. Routine removal votes could use a simple majority, as in our current implementation,
+while high-stakes decisions that change the voting protocol itself, such as amending the quorum size, voting-period length, or
+eligibility threshold α, could require a higher super-majority as they need to be properly vetted. Decentralized-finance (DeFi)
+governance follows a similar tiered logic, where core protocol and governance changes typically demand higher quorums and
+longer execution delays than routine parameter adjustments81, 82 . A safeguard already used in DeFi is a timelock, a mandatory
+delay between a passed rule change and its activation, giving the swarm or a human supervisor a window to detect and reject a
+malicious change before it takes effect81, 82 . Prior work, for instance, has shown that using blockchain in robot swarms can
+suffer from block production latency, since every transaction must be confirmed and committed to a block before it takes effect.
+This latency depends on network connectivity and on blockchain parameters, particularly block time, which must be tuned
+carefully to avoid forks83 .
+
+
+                                                                                                                           12/26
+     (iv) Human-swarm interaction: traditionally, real-time human interaction has been difficult to implement in robot swarms
+because of their decentralized design. This is also because real-time approaches can end-up operator-centric which risks making
+the human-in-the-loop a single-point-of-failure or potential bottleneck84, 85 . Recent literature in swarm robotics, however,
+highlights the need for ethical governance, as human oversight remains no less important for swarms than it is for single or
+centralized robotic systems, and this oversight needs to be incorporated in advance of deployment rather than improvised
+after a failure14 . A DAO-governed swarm can address this by assigning certain decisions to stakeholder committees with
+transparent roles and clearly defined authority, while robots continue to manage routine operational decisions within the policies
+established through collective voting. This is because in many high-stakes scenarios, robots’ algorithmic decision-making
+may be insufficient for governance decisions particularly those involving ethical trade-offs or significant consequences for
+stakeholders. This maps onto the operational/constitutional distinction introduced earlier where humans hold the constitutional
+layer, robots hold the operational layer, and each is accountable to rules recorded transparently on-chain. This creates a new
+model of human-swarm interaction, where governance evolves through decentralized participation rather than the authority of a
+single designer or operator, while preserving autonomous operation. Within a DAO both the robots and stakeholder committees
+will have a bounded governance role. For instance, human stakeholders propose and vote on high-level, constitutional parameters
+(removal thresholds, quorum sizes, emergency-pause conditions, approved protocol-update procedures, and the categories of
+action requiring human co-signatures) and passed votes update the smart contract’s state accordingly. Robots, in turn, read these
+on-chain policies voted on by stakeholders, monitor local and peer data, and autonomously initiate operational proposals within
+the boundaries the humans have set; robot-initiated proposals are then voted on among robots according to the human-defined
+rules, with outcomes enforced automatically by the contract (e.g., altering robots’ voting weight, quarantining it, or removing
+it). Humans retain the right to intervene as needed to refute, pause, or require manual review, but according to the governance
+rules they themselves established in advance. DAOs can therefore build a deliberate path for human intervention into the
+swarms by design, rather than leaving it as an uncontrolled fallback. This intervention is necessary because the same property
+of automated execution that makes on-chain rules powerful, also means they cannot correct course if the rules themselves
+turn out to be wrong64 . Here, we extend this same logic to structure the roles of human stakeholders and robots within the
+governance process itself, rather than treating them in isolation.
+     (v) Mission control: multi-robot systems typically rely on a central mission controller86 , while swarm robotics implementa-
+tions usually operate in a single, predefined behavioral mode (e.g., aggregation, exploration, formation, transport). Complex
+real-world missions, however, require decentralized mechanisms to prioritize and switch between such behaviors74, 87, 88 .
+Existing approaches to complex missions rely on offline design using evolutionary algorithms89, 90 , and therefore cannot assign
+mission priorities or switch behaviors in real time. A DAO can govern swarms’ mission priorities, as the result of a decision
+process arising from shared governance, rather than a central operator dictating mission goals, or from the assumption that
+all robots share a single, predefined objective. Stakeholders or robots, which may have competing or aligned objectives, can
+propose, vote, and agree on high-level mission goals, such as which region to explore, which environmental variables to
+prioritize, or when to switch between different behavioral modes. Once a proposal is approved, the swarm self-organizes to
+meet it, switching between tasks or priorities, rather than following a fixed sequential procedure or finite state machine. This
+framework keeps critical high-level decisions securely and transparently enforced through blockchain-based DAO mechanisms,
+while preserving scalability and autonomy of decentralized swarm control. However, designing mission control involves setting
+protocol limits, thresholds, and quorums such that mission switching does not create bottlenecks by consuming excessive time,
+and these parameters must be set accordingly. This is related to the trade-off that shapes distributed decision-making in robot
+swarms, where speed and accuracy are jointly influenced by quorum size and by how much information is pooled before a
+decision is made19, 22 . Requiring a vote on every granular decision in DAO governance similarly increases the cognitive and
+time cost of participation, and therefore, low voter participation is already a widely documented consequence in deployed
+DAOs91 .
+    The second important aspect of DAO implementation is its deployment architecture. A DAO’s governance rules are enforced
+through smart contracts and its voting decisions are recorded on a blockchain ledger that provides the technological foundation
+for decentralized governance; however, where this blockchain infrastructure resides is itself a design choice. In our work, the
+blockchain hosting the DAO was maintained by the robots themselves (Figure 8A). As such, the swarm was both the subject
+of governance and the infrastructure responsible for maintaining it. More generally, however, robots need not maintain the
+underlying blockchain themselves13 . If robots have access to an external communication network, they could instead participate
+in a DAO deployed on a public blockchain, maintained by a much larger and more geographically distributed set of nodes
+(Figure 8B). In this model, swarm decisions would be enforced according to the consensus reached by that external network
+rather than by a single coordinating entity, which eliminates single points of failure, and prevents concentration of control
+in any individual stakeholder. Extending this further, especially in from a human-swarm application perspective, the DAO’s
+membership need not consist of robots alone: it could include multiple stakeholders, including humans, participating alongside
+robots in the same governance process (Figure 8C).
+
+
+                                                                                                                           13/26
+     The third aspect of DAO implementation concerns accountability and security. As DAOs leverage blockchain technology,
+they inherit its properties such as auditability, transparency, and automated execution. The blockchain provides a tamper-proof
+record of voting actions, and smart contracts ensure that decision rules are executed exactly as specified, reducing ambiguity
+in decision-making. These properties guarantee that a policy executed by a DAO leaves an immutable trace, especially in
+implementing constitutional governance, by recording how that policy came to be: which robots proposed it, which voted for
+it, and under which rule. This attributability is directly relevant to accountability frameworks for swarm robotics, which call
+for traceable responsibility as a precondition for real-world deployment14 . It also creates a point for ethical review where an
+auditor can interrogate not only whether a rule was executed correctly, but whether the rule itself was legitimately constituted
+and whom it privileged.
+     However, the security of a DAO ultimately depends on the security of its smart contracts40 , as demonstrated by recent
+hacks92, 93 . These incidents arise not only from vulnerabilities in the code itself, such as the 2016 exploit of ‘The DAO,’ but also
+from purely governance-level attacks, including legitimate-looking proposals that conceal malicious code to steal a DAO’s data
+or funds, exploitation of the user-facing interfaces through which humans participate in governance, and spamming the protocol
+with a high volume of proposals, some of which may themselves be malicious93 . Implementing DAO governance for robot
+swarms can carry the same risk. As tasks grow more complex and multifaceted beyond collective sensing, contract complexity
+increases correspondingly, and this complexity must be carefully managed to avoid introducing similar vulnerabilities. Our
+implementation reduces this risk through local, individually-run detection, in which each robot judges incoming estimates
+on its own rather than relying on information shared across the swarm. Because Byzantine robots cannot see the detection
+strategies used by their neighbors, this makes it harder for them to coordinate an attack. The same design also helps address
+delayed Byzantine behavior, in which a robot behaves honestly for a long time to build up trust before turning malicious.
+Because DAO-based removal mechanisms can judge behavior over a longer time horizon rather than only recent actions
+(see Methods, DAO), the system weighs a robot’s full history, rather than being misled by outdated information or by a few
+recent but unrepresentative actions.
+
+
+
+
+                                                            (B)
+               (A)
+
+
+                                                                                       information
+                                                                                        exchange
+
+
+
+
+                                                            (C)
+
+
+
+                                                                                       information
+                                                                                        exchange
+
+                      DAO         Blockchain
+                                     node         Server
+
+
+
+Figure 8. DAO architectures. (A) Swarm-hosted architecture where the robots themselves maintain the blockchain and the
+swarm is simultaneously the subject of governance and the infrastructure that enforces it. (B) Externally-hosted architecture in
+which the robots that are part of DAO access external network to participate in governance decisions on a public blockchain,
+maintained by a distributed set of nodes rather than the swarm. (C) Multi-stakeholder architecture with DAO membership
+extending beyond robots to include human participants, who take part in the same governance process alongside the swarm.
+
+
+
+Methods
+We divide the Methods into two sections. The first section Blockchain and DAOs provides a background on blockchain,
+smart contracts, and the consensus algorithms, along with the possible mechanism that can be used to form DAOs for access
+
+
+                                                                                                                              14/26
+control in a swarm, which can be adapted to other potential applications discussed in the Discussion section. The second
+section Experimental setup introduces the simplified DAO we implemented to detect, vote on, and remove Byzantine behavior
+in a collective sensing scenario, followed by our experimental setup.
+
+Blockchain and DAOs
+Blockchain fundamentals
+Blockchain technology enables peer-to-peer networks to reach consensus on shared data without requiring trust among
+participating nodes94, 95 . The blockchain is a decentralized ledger composed of sequentially linked blocks, beginning with a
+common genesis block. Each block records data generated by nodes called transactions and includes a cryptographic hash
+referencing its predecessor. By leveraging blockchain technology, tamper-proof algorithms can be executed in a distributed
+manner by the use of smart contracts. Robot nodes exchange information via blockchain transactions and can establish
+system-wide rules encoded within these smart contracts, enabling the distributed control and coordination of swarm behavior.
+     Using the Proof-of-Authority (PoA) consensus protocol59 , a designated   j set
+                                                                                  k of N nodes, known as sealers, create new blocks
+                                                                                N
+at fixed intervals. After proposing a block, a sealer must wait for at least 2 + 1 subsequent blocks before producing another
+block. When multiple sealers generate blocks simultaneously (but potentially in different partitions), conflicting versions of the
+blockchain may arise due to differences in transactions or their ordering, leading to forks. To resolve such conflicts, nodes agree
+on the chain with the highest difficulty: a difficulty of 2 is assigned to blocks produced by the preferred sealer (for each block, a
+preferred sealer is selected in a round-robin manner) and a difficulty of 1 to those produced by non-preferred sealers. Any
+attempt to modify an existing block in a blockchain invalidates all subsequent blocks (and, therefore, reduces the chain’s overall
+difficulty), ensuring data integrity and tamper resistance.
+     Another feature of PoA is the minimum interval between successive blocks–the block period–which we set to 15 s by
+default, in line with prior work33, 60, 83 . In blockchain-enabled robot swarms, however, actual block production often takes
+longer than this target period, as sparse connectivity and a continually changing network topology can leave no suitable sealer
+available for extended periods of time.
+
+           The smart contract specifies
+           only the removal procedure;
+           the choice of which robot to
+            target for removal is made
+           locally by each robot and is                   Smart contract             Some illustrative
+              not disclosed to others,                     implements             cases of robot removal
+                                                          DAO regulations           (when, who, how)
+                supporting security.
+
+
+                                                                 When does a robot remove?
+                                                      Fixed: Every x blocks or x timesteps
+                                                     On-demand:
+                                                        Proposal-based: initiate vote-out if x% agree
+                                                      Threshold-based: size regulation, tokenized nomination
+                                                                Who can participate in removal?
+                                             Tokenized:
+                                                Linear: 1 vote = 1 token (plutocracy)
+                                                Quadratic: reduces oligarchy
+   Access control: for instance,                Weighted: tokens split among options
+      for every robot removed you            Non-tokenized:
+      allow robot(s) to join                    1 vote = 1 robot (plurality voting)
+                                                Reputation: based on time & successful removals (some contribution)
+      after every x timesteps/blocks            Liquid democracy: delegated voting
+      you let robot(s) join
+                                                                  How are robots removed?
+                                                        Absolute majority or Relative majority
+                                                        Hybrid approaches: combining majority rules with
+                                                        absolute and relative performance
+
+
+
+
+Figure 9. DAO-based governance of participation rights in open robot swarms. Illustration detailing how the DAO
+regulates swarm membership through voting by defining when removal is triggered, which robots participate in the decision
+process, and how removal is executed, with a particular focus on Byzantine robots (the e-puck robot illustration taken from
+Webots, Cyberbotics). As underperforming or malicious robots are removed, new robots can be added to maintain or adjust the
+swarm size. The voting logic used to identify removal candidates can remain private to each robot. Detailed explanation of
+these mechanisms are provided in section Methods.
+
+
+
+                                                                                                                              15/26
+DAO
+The DAO’s governance is determined by when robots vote, who the right to vote, and how robot votes are processed. These
+rules are encoded in the swarm’s smart contract, which specifies when a robot can be removed, who is authorized to remove it,
+and how the removal procedure is executed. Existing DAOs employ a variety of governance and voting mechanisms, including
+token-based systems, reputation-based models, delegated voting, and hybrid approaches96–98 . These mechanisms can be
+adapted for use in robot swarms; we provide some examples in Figure 9. Accordingly, we can design our DAOs around three
+core principles: when, for whom, and how robots vote.
+
+When to remove
+“When to remove” refers to the conditions under which the DAO’s robot members initiate the removal of another robot. In our
+robot swarm, this typically happens when a robot exhibits malicious behavior, abnormal estimates, or actions inconsistent with
+the swarm’s objectives. The methodology used by robots to detect malicious behavior can differ from robot to robot, functioning
+as a black box that prevents others—including Byzantine robots—from learning the detection strategy and circumventing it. In
+our implementation (section DAO implementation), the non-Byzantine robots use a mechanism that detects collusion among
+robots whose estimates fall within a specific range, enabling them to flag and remove malicious robots. Alternative Byzantine
+detection methods could range from simple thresholding to filtering out robots whose estimates fall within suspicious ranges, to
+more complex machine-learning–based approaches that optimize the detection of malicious behavior (given the wide range of
+alternatives possible, developing such detection methods is outside the scope of this paper). The Byzantine robots, conversely,
+attempt to behave in a way that counters this adaptive thresholding strategy.
+     The “when to remove” mechanism need not be limited to malicious behavior; it can also be used to regulate the size and
+efficiency of the swarm. In situations where resources must be conserved or where blockchain performance, such as block
+latency37 , or block inconsistency83 , no longer improves with additional robots, the swarm can be triggered to remove certain
+robots from the swarm, allowing the system to adapt dynamically. We elaborate on three primary mechanisms for triggering a
+removal process below.
+     Scheduled removal: The robots are allowed to vote on removals at predefined intervals, such as every x timesteps or after
+k blockchain blocks, during which the robots in the swarm inspect task-specific data received from the robots for signs of
+Byzantine behavior. This strategy is useful in systems susceptible to a high number of Byzantine robots or abnormal estimates,
+and depending on the influx of Byzantine behavior, the interval or blocks need to be tuned accordingly.
+     Proposal-based removal: A removal process is triggered when robots detect Byzantine activity and collectively propose
+initiating a vote-out round. This mechanism is inspired by quorum-based voting99 , in which the removal proposal is activated
+only if a predefined number of robots (the quorum threshold) signal the presence of a Byzantine robot. While proposal-based
+voting is more decentralized than scheduled removal and encourages active participation by spreading the power to initiate
+a vote-out across members, it introduces several challenges. Setting the quorum threshold is particularly sensitive, as if the
+quorum is too high, many valid proposals may fail due to insufficient participation. If the quorum is too low, Byzantine robots
+could repeatedly signal removal and collude to remove honest robots.
+     Threshold-based removal: A removal process may also be initiated through threshold-based mechanisms, in which the
+process is triggered only after a predefined condition is satisfied. One example is size-based regulation, where reaching a
+threshold related to the swarm’s ideal size can initiate a vote-out process to prevent the swarm from becoming excessively
+large. This threshold may be defined with respect to the area that needs to be covered, physical congestion, communication
+bottlenecks, operational cost, or stricter security requirements that arise from avoiding redundant units.
+
+Who removes
+“Who can request or approve removal” defines how authorized robots within the DAO initiate or participate in removing
+a member from the swarm. These authority rights can be structured using either tokenized or non-tokenized governance
+mechanisms. In tokenized systems, governance tokens form the basis of decision-making where robots that hold these tokens
+can vote on proposals, influence collective actions, and shape system-level decisions such as software upgrades, parameter
+changes, or resource allocations. In non-tokenized approaches, voting power is not linked to token ownership. Instead, a
+robot’s authority to propose or approve removal is derived from performance-based metrics such as historical sensing accuracy,
+behavioral reliability, or sustained participation in swarm tasks. In the following, tokenized and non-tokenized mechanisms are
+described in more detail.
+    Tokenized mechanisms: In tokenized mechanisms, voting power grows with the number of tokens a robot holds. Applied to
+robot swarms, such tokens can be distributed initially as a form of universal basic income, as shown in Strobel et al.33 and
+other blockchain-based swarm robotics studies36, 67 , and later earned through useful work or consistently honest behavior.
+The simplest form of tokenized mechanism is the familiar ‘one token, one vote’ approach, where greater token ownership
+directly increases influence. Although this design can motivate participation, it also introduces the risk of centralization100 . If
+a few robots accumulate most of the tokens, the system can drift toward a plutocratic structure, which becomes particularly
+
+
+                                                                                                                             16/26
+problematic when those high-token robots behave maliciously. To counter this, quadratic voting101 offers a more balanced
+alternative. Quadratic voting increases the cost of casting extra votes quadratically, resulting in large token holders retaining
+influence but not easily overpowering token holders with fewer tokens. This encourages honest robots to use their tokens
+carefully and greatly reduces the risk that a small group can dominate the voting process. When a swarm needs to choose
+among several options, such as identifying many robots in the swarm that might be behaving in a malicious manner, weighted
+voting can be a flexible voting mechanism. In weighted voting, each robot can distribute its tokens among different options,
+reflecting varying levels of confidence rather than a single binary choice. The effect of weighted voting depends on how each
+robot distributes its available tokens among the potential candidates. As robots must also reserve tokens for essential tasks, such
+as contributing accurate environmental estimates, newly arrived robots have limited freedom in how aggressively they can vote.
+This naturally restricts their influence and prevents them from immediately coordinating a strong attack. As a result, Byzantine
+entrants cannot rapidly sway the collective judgment or overwhelm the system with malicious nominations. Moreover, since
+robots earn tokens by voting for the same candidates as the majority and by successfully removing faulty robots, the voting
+process reinforces honest behavior and makes it costly for newcomers to act adversarially.
+    Non-tokenized mechanisms: In this case, the DAOs use governance models where the voting power of robots is not tied to
+token ownership. Several approaches from voting literature can be utilized for allocating voting rights in such swarms. The
+simplest model is plurality voting96, 102 , where each robot is assigned exactly one voting right. Although easy to implement
+and intuitively fair, plurality voting is vulnerable to manipulation and may produce outcomes that do not reflect the swarm’s
+true preferences. For example, depending on the quorum, a removal can occur with only a small fraction of overall support,
+stemming from Byzantine or malfunctioning robots. In a permissionless swarm, plurality voting introduces an additional
+challenge: any robot can create new identities, making the system vulnerable to Sybil attacks. An adversary could simply
+generate multiple identities to amplify its influence and skew the outcome of collective decisions.
+    More sophisticated non-tokenized systems assign voting power based on reputation, contribution, or time spent doing a
+task rather than token accumulation. In reputation-based voting97, 100 , robots can build reputation by providing accurate
+estimates, contributing useful work (including physical work using oracles34 ), or remaining in the system without being
+voted out. Robots with long-standing, consistent behavior earn more influence, making the swarm more resistant to newly
+introduced or low-reputation Byzantine robots. Reputation can also be set to decay over time to prevent early contributors
+from permanently dominating governance, to ensure opportunities for newer robots that may not be Byzantine, and to keep
+the swarm adaptive to environmental changes or shifts in robot capabilities. By doing so, Byzantine robots cannot exploit
+long-term trust by behaving well initially and becoming malicious later.
+    Another non-tokenized mechanism is delegated voting, in which robots that lack confidence in their local estimates transfer
+their voting power to other robots with stronger sensing capabilities or higher demonstrated accuracy. Since Byzantine robots
+progressively lose reputation or rewards as their behavior diverges from the swarm’s truth, they are unlikely to attract delegated
+votes, shifting trust naturally toward robots with consistent and reliable performance. Liquid democracy103 implements this
+idea by allowing newly added or uncertain robots to delegate their voting rights to more experienced peers. In turn, they receive
+a share of the reward when their chosen delegate successfully identifies and removes a Byzantine robot, creating an incentive
+structure that aligns individual choices with accurate governance. Such delegation mechanisms also provide a pathway for
+newly joined robots to gradually accumulate influence (or tokens in tokenized mechanisms), enabling them to participate more
+meaningfully in future voting rounds.
+    Multisignature voting96, 104 can also be adapted to the operational structure of robot swarms. In this approach, a predefined
+subset of robots, such as the initial swarm members or trusted sealer nodes, must jointly approve a removal decision or validate
+the votes a robot submits before they are recorded on-chain. This strategy provides strong control over swarm membership,
+particularly when the initial group of signers is verified to be non-Byzantine at deployment time. Requiring multiple signatures
+increases accountability and helps isolate malicious behavior, as discrepancies in signature patterns can reveal which robots
+are acting dishonestly. Nevertheless, multisignature schemes introduce the risk of collusion among the designated signers. A
+coordinated subgroup could authorize harmful removals or obstruct legitimate ones, which becomes especially problematic in
+open swarms where robots may be owned or operated by different stakeholders13, 62 .
+    Finally, conviction voting96 also offers an alternative mechanism suited to robot swarms. In this approach, voting power
+increases gradually the longer a robot maintains the same vote on a suspected Byzantine robot. Once a voting period is opened
+by a smart contract, any robot in the swarm can cast or update its vote at any time. A vote that remains stable accumulates
+‘conviction’ asymptotically, where at each time step it increases by a fixed fraction of the remaining distance to its maximum
+value (set by the vote’s weight). If a robot changes its vote, the conviction associated with its previous choice begins to decay.
+Therefore, the conviction process captures persistent agreement within the swarm while suppressing sudden or coordinated
+surges that might arise if several malicious robots join simultaneously. By rewarding consistent, time-sustained identification,
+conviction voting helps the swarm converge on reliable identification of malicious robots.
+    Use cases of tokenized and non-tokenized mechanisms: The best voting mechanism for a DAO in robot swarms strongly
+
+
+                                                                                                                            17/26
+depends on the intended application. Voting is not limited to identifying or removing Byzantine robots but can support other
+tasks, such as dynamic task-allocation based on robot capabilities, budgets, or coordinating environmental coverage. For
+instance, robots may bid or stake to accept jobs that match their sensors, battery levels, or functional modules, while smart
+contracts handle task assignment and verify successful completion. In such scenarios, token-weighted or reputation-weighted
+voting can ensure that the most capable and reliable robots have proportionally greater influence on which robots are selected
+for each task. These voting mechanisms also allow DAOs to form open swarms, enabling newly arrived robots with relevant
+sensors or upgraded hardware to join and gradually gain influence through token accumulation or contribution-based reputation,
+as in conviction-style voting. Similarly, swarm-level parameters such as environmental exploration rates, communication ranges
+and sensing thresholds, or repulsion and attraction thresholds can be adapted during runtime through DAO proposals. For these
+updates, conviction or multisignature voting can help the swarm converge on stable, consistent parameter choices over time,
+while non-tokenized voting provides a faster alternative when faster consensus is needed.
+    Hybrid voting mechanisms could combine token and reputation systems, where each system could serve different goals
+depending on the DAO’s purpose, size, and community dynamics. For example, tokens could represent economic commitment,
+and reputation could capture a robot’s historical accuracy, task performance, and consistency in the task at hand. By combining
+the two through reputation-weighted token voting, a robot’s token-based voting power is scaled by its demonstrated reliability,
+preventing newly added robots from exerting disproportionate influence before they have proven themselves. Dual-quorum
+designs could extend this idea by requiring that proposals satisfy both a token threshold and a reputation threshold, ensuring
+that decisions are supported not only by robots with many tokens but also by robots with demonstrated work. Conviction-based
+tokenized staking can be another hybrid variant in which robots stake tokens on their preferred outcome, and their stake is
+amplified by reputation multipliers derived from past task success or diagnostic correctness. Overall, these hybrid approaches
+can balance the contributions of long-standing, trustworthy robots with the openness needed for new robots to join and
+eventually participate meaningfully, ensuring that both commitment and demonstrated reliability shape collective decisions.
+Such hybrid schemes also illustrate that voting mechanisms can be adapted to the specific task and performance requirements at
+hand, and that possible designs are non-exhaustive.
+How to remove
+There are certain mechanisms by which a DAO can enforce a decision based on the votes it receives from the robots (those
+‘who’ can remove). Once the DAO has collected the votes, it must aggregate them and determine which robot(s) should be
+removed from the swarm. A straightforward approach is to apply a simple majority rule, where the robot receiving the highest
+number of removal votes is excluded from the swarm. This can be refined by introducing threshold-based criteria, such as an
+absolute threshold (a predefined number of votes required for removal) or a relative threshold scaled to swarm size (e.g., a robot
+must receive votes from a quorum of swarm members to be removed). For voting mechanisms that produce weighted outcomes,
+such as token-based or reputation-based voting, the smart contract can instead remove robots whose aggregated score exceeds a
+predefined removal boundary, ensuring that both the intensity and distribution of suspicion are taken into account. For instance,
+when robots nominate multiple candidates, the system can instead remove any robot that appears in at least L % of all submitted
+lists, ensuring that widely suspected nodes are prioritized. The decision rules may consider only votes from the current round,
+or they may incorporate historical information by taking into account each robot’s past voting results, allowing the DAO to
+balance short-term consensus with longer-term behavioral trends when determining removals. For instance, instead of removing
+a robot immediately, the DAO could run several voting rounds spaced in time. A robot would then be removed only if it is
+consistently flagged across multiple rounds.
+     Once removal is decided, the smart contract marks the robot as removed and broadcasts this state to the swarm, which then
+moves the robot out of the swarm and ceases its blockchain node. Robots update their list of active robots and cease interacting
+with the removed robot and disregard its information, effectively excluding it from collective swarm behavior.
+
+Experimental setup
+DAO implementation
+In our DAO implementation (Figure 1B), which is built on top of the collective sensing setup, the robots evaluate the swarm for
+Byzantine behavior every 500 timesteps (approximately every 8 minutes) to signal the contract or when they receive a signal
+from the smart contract to vote on potential Byzantine peers. In our setup, every robot uses the same detection mechanism. In
+practice, however, each robot could use any mechanism without disclosing it to its peers, because each robot independently
+analyzes the recent estimation data used in the swarm aggregation process to compute the swarm estimate. The analysis of
+recent estimates is restricted to the most recent voting rounds (i.e., the estimates robots send that are used to compute the
+system estimate by averaging) to emphasize current behavior and reduce the influence of outdated estimates. Robots that have
+already been removed and the local robot itself are excluded from evaluation. The detection logic prioritizes collusion as
+the strongest indicator of Byzantine behavior. If three or more robots submit identical or near-identical estimates—matching
+exactly or within a small system-defined tolerance of each other (the deviation threshold use to detect collusion in the system is
+
+
+                                                                                                                            18/26
+±0.07 from the swarm mean)—they are flagged. Such agreement is unlikely among honest decentralized agents and suggests
+coordinated malicious behavior. If no collusion is detected, the algorithm applies an adaptive statistical filter. It computes the
+spread of recent estimates using the standard deviation and derives a dynamic threshold scaled by a tunable parameter. Robots
+whose estimates deviate from the system mean beyond this threshold are considered outliers and selected for removal. This
+adaptive mechanism prevents honest robots from being penalized during periods of high natural variability but also excludes
+robots that are sending estimates that are very off. While honest robots flag peers whose estimates diverge excessively from the
+mean, Byzantine robots do the opposite and always use adaptive thresholding to check for estimates that are closer to the mean,
+in an attempt to remove honest robots from the system. Overall, the removal mechanism is a simple approach specific to our
+system that identifies irregular patterns of coordination or deviation, but it is not the key contribution of this work.
+     Our DAO-based access control implementation has three phases: propose, vote, and execute.
+     Propose If a robot is detected to be acting maliciously, the honest robots signal the smart contract by executing the
+propose() function, proposing that a robot needs to be removed. Once a robot in the swarm proposes a vote-out round, the
+smart contract waits until x % (in our case 50 %) of the swarm has proposed removal for a robot before proceeding. Robots are
+eligible to participate in this voting process only if they were present at system initialization (the base swarm) or, if added later,
+have contributed to the task at least α times (i.e., submitted α valid estimates). In DAO-based organizational implementations,
+statutory quorums are often incorporated into the proposal process to ensure robustness, which means that a proposal must not
+only originate from at least x % of the robots but also surpass a predefined minimum threshold of supporting proposals. In our
+system, this threshold is set to five proposals. Setting the threshold too high can make the Byzantine removal decision-making
+process too restrictive and time-consuming before the robots are removed. On the other hand, setting the threshold too low can
+result in frequent voting triggers that could flag non-Byzantines to be removed.
+     Vote Once the smart contract issues a request for votes, each eligible robot compiles a list of robots it considers Byzantine
+and executes the sendvote() function of the smart contract to participate in the vote-out. Robots that initially proposed
+a voting round also recompile their removal lists when voting begins to account for new estimates received while awaiting
+quorum and the smart contract’s initiation of voting. The smart contract waits for five blocks after initiating a vote-out, called
+voting period. Only robots with the required participation history can vote to remove another robot.
+     Execute After a voting period of five blocks to collect the removal lists, the smart contract removes any robot that appears in
+at least 50 % of the submitted lists and receives at least five votes.
+     Given that the task at hand is the collective sensing scenario implemented in Strobel et al.33 , the smart contract has additional
+functions that aggregate the swarm estimates of the environment to produce the collective estimate (see Supplementary material).
+Robots send an estimate of the proportion of white tiles they believe exist in the environment by executing a smart contract
+function. Each robot estimate is stored in a temporary list maintained by the smart contract. Once this list contains a specified
+number of estimates, the estimate collection round ends, and the smart contract computes their arithmetic mean, which becomes
+the swarm estimate before the next round of estimate collection begins. Not all robots vote in every round, as sending an estimate
+requires staking tokens. When the swarm updates its mean after a removal round, it excludes the estimates of the removed
+robots and does not take them into account in the subsequent means. After a robot is removed, its tokens are redistributed
+equally among the robots who contributed to voting it out.
+
+Platform
+Our experiments are carried out in the ARGoS swarm robotics simulator using Pi-puck robots. The arena is a square environment
+measuring 3.55 m2 and enclosed by walls (see Figure 3A). Unless otherwise specified, each simulation runs for 3,600 timesteps
+(with 1 timestep corresponding to 1 s, so each run lasts an hour), and we conduct 10 repetitions for each experimental condition.
+During the final 15 minutes of each run, no additional Byzantine robots are introduced, ensuring that the observed accuracy and
+misclassification rates reflect the system’s ability to detect and remove Byzantines without being skewed by new Byzantines
+added immediately after each removal.
+    Every robot in the swarm operates as a blockchain node, while only designated sealer robots produce blocks using
+Toychain56 —a lightweight blockchain framework designed specifically for swarm robotics research. The code used in this
+study is open-source and provided as Supplementary Material. At the beginning of each run, robots are randomly placed in
+the arena (see Figure 3A–B) and execute a random-walk behavior comprising periods of straight motion with random turns,
+consistent with prior blockchain-enabled swarm robotics work33, 62, 83, 105 . Only the robots that the swarm is initialized with
+at the beginning of the experiment are sealers. Any other robots added during the runtime are non-sealers, i.e., they do not
+produce blocks. Blockchain synchronization among robots occurs locally, within a communication range of 13 cm.
+
+Experimental cases
+Using the DAO, we conduct three experiments, which we discuss below. Table 1 provides a general overview of the differences
+between them.
+
+
+                                                                                                                                19/26
+                      Table 1. Overview of the experimental parameters across the experimental cases.
+
+   Parameter                                          Experiment 1             Experiment 2           Experiment 3
+   Initial swarm size                                 12                       12                     12
+   Initial number of Byzantine robots                 4                        0                      0
+   Robot addition rate (without removals)             0                        Exponentially      in- Exponentially     in-
+                                                                               creasing intervals (2 creasing intervals (2
+                                                                               min, 4 min, 8 min, 16 min, 4 min, 8 min, 16
+                                                                               min, 32 min)           min, 32 min)
+   Robots added per removal event                     3                        2                      2
+   Probability of an added robot being Byzantine      50%                      100%                   50%
+   Alpha values tested                                {1, 10}                  {1, 10}                {1, 10}
+   Evaluation interval for removal (timesteps)        500                      500                    500
+   Total experiment duration (timesteps)              3600                     3600                   3600
+
+
+Neutralizing existing Byzantines     We begin with a swarm of 12 robots, of which 33 % (4 robots) are Byzantines. For every
+robot removed, we add three new robots to the system that have a 50 % probability of being Byzantine (therefore, the swarm
+size increases). Newly added robots, whether Byzantine or non-Byzantine, must satisfy the DAO’s contribution rules before
+being granted voting privileges to remove another robot. Using this scenario, we show that a DAO can be used to remove
+Byzantines that have been part of the swarm since the beginning, as well as new ones that may join the swarm at a later time.
+
+Preventing Byzantines from taking over a functioning system           We start with a swarm initially containing only non-
+Byzantine robots, but add exclusively Byzantine robots. As Byzantines are added at exponentially increasing intervals—after 2,
+4, 8, 16, and 32 minutes—the system detects and removes them to restore convergence on the correct swarm estimate. Unlike
+the first experiment, where three robots (not necessarily Byzantine) were introduced per removal, here only two robots are
+added per removal, all of which are Byzantine. This compensates for the additional influx from robots added at exponentially
+increasing intervals, preventing an uncontrolled accumulation of Byzantine nodes.
+
+Supporting controlled system growth          We start with an initially healthy swarm and introduce new robots at exponentially
+increasing intervals, each with a 50 % probability of being Byzantine. For each robot removed, two new robots are added,
+allowing the swarm to grow while maintaining resilience.
+    In general, besides the periodic check for Byzantine behavior in the system, other parameters also influence the rate at which
+robots are added and removed from the system to prevent Byzantine takeover. The α parameter determines how long newly
+added robots must remain in the system and contribute valid estimates before they gain the privilege to participate in removals.
+In our experiments, we test a low value of α = 1 where a robot needs to contribute only a single estimate to participate in the
+removal of other robot(s), and a higher value of α = 10 where a robot must contribute ten estimates without being removed
+from the swarm before it attains this removal privilege. The influx of new robots in the swarm is also regulated by controlling
+the number of robots admitted per removal and, in Experiments 2 and 3, by introducing robots into the initially healthy swarm
+at exponentially increasing time intervals. If most newly added robots are expected to be Byzantine, the inclusion of new robots
+should be low; if the probability of additions is small, it can be higher. The influx of robots into the swarm is also partially
+impacted by the interval at which the system removes a Byzantine, which triggers the addition of new robots in the system.
+
+Real-robot demonstrations
+We conducted real-robot experiments for the second experimental case, the most challenging scenario, in which a Byzantine
+takeover must be prevented within an initially healthy swarm. As in real-world deployments, the experiments were subject to
+practical constraints, including limited robot battery life, a limited number of available robots, and the time overhead associated
+with removing and replacing robots within the swarm. The experimental setup, described in Section DAO implementation, was
+therefore adapted to account for these physical limitations. Specifically, the following key modifications were introduced: (i) to
+accelerate the experiment, robots detect Byzantine behavior every 150 time-steps (every two and half minutes), are provided
+with an additional token alongside the basic tokens provided at the start of each run; (ii) following a robot removal, a two-minute
+buffer is enforced before replacement robots are introduced, allowing sufficient time to complete all removals within a removal
+round; (iii) due to the limited number of robots available, no additional robots are introduced once 24 are active in the swarm,
+after which only removals take place, either for two rounds or for a maximum of 15 minutes; (iv) for the same reason, the
+initial swarm consists of eight robots operating within a smaller arena of 1 m2 . One demonstration was conducted for each of
+four configurations: naive Byzantine with α = 1 and α = 10, and smart Byzantine with α = 1 and α = 10. To ensure a fair
+
+
+                                                                                                                            20/26
+comparison, we conduct additional simulations under the adapted experimental setup as the real-robot demonstrations for the
+second experiment.
+
+Performance metrics
+We show the performance of our DAO-governed robot swarm using the following metrics: (i) The average absolute error
+defined as the absolute difference between the swarm’s estimate and the true fraction of white tiles. This value is computed by
+taking, at each timestep, the swarm estimate for each run (the average of individual robot estimates as recorded in the smart
+contract of the robot with longest blockchain), computing its absolute error from the actual fraction of tiles (25%), and then
+averaging these absolute errors across all runs to quantify the swarm’s collective sensing performance for an experimental set.
+(ii) The true positives which represent identification accuracy, i.e., the proportion of Byzantine robots that were removed by the
+end of a run, computed as the number of removed Byzantine robots divided by the total number of Byzantine robots. (iii) The
+false positives which represent identification error, i.e., the proportion of honest robots that were removed by the end of a run,
+computed as the number of removed non-Byzantine robots divided by the total number of non-Byzantine robots. (iv) The
+average number of robots in the swarm over time across all the runs of an experiment. (v) The average number of Byzantines in
+the swarm over time across all the runs of an experiment. (vi) The average number of robots removed from the swarm across
+all the runs of an experiment.
+
+Data Availability
+The code used to generate the simulated data and the robot controller is open source and publicly available in the following
+GitHub repository: https://github.com/rainazakir/dao
+
+References
+  1. Dorigo, M., Birattari, M. & Brambilla, M. Swarm Robotics. Scholarpedia 9, 1463 (2014).
+  2. Dorigo, M., Theraulaz, G. & Trianni, V. Swarm robotics: Past, Present and Future. Proc. IEEE 109, 1152–1165 (2021).
+  3. Hamann, H. Swarm Robotics: A Formal Approach (Springer, 2018).
+  4. Albani, D., IJsselmuiden, J., Haken, R. & Trianni, V. Monitoring and Mapping with Robot Swarms for Agricultural
+     Applications. In 2017 14th IEEE International Conference on Advanced Video and Signal Based Surveillance (AVSS),
+     1–6 (2017).
+  5. Albiero, D., Garcia, A., Umezu, C. & Paulo, R. Swarm robots in mechanized agricultural operations: A review about
+     challenges for research. Comput. Electron. Agric. 193, 106608 (2022).
+  6. Tarapore, D., Groß, R. & Zauner, K.-P. Sparse Robot Swarms: Moving Swarms to Real-World Applications. Front.
+     Robotics AI 7, 83 (2020).
+  7. Huang, X., Arvin, F., West, C., Watson, S. & Lennox, B. Exploration in extreme environments with swarm robotic system.
+     In 2019 IEEE International Conference on Mechatronics (ICM), vol. 1, 193–198 (2019).
+  8. Werfel, J., Petersen, K. & Nagpal, R. Designing Collective Behavior in a Termite-Inspired Robot Construction Team.
+     Science 343, 754–758 (2014).
+  9. Allwright, M., Bhalla, N. & Dorigo, M. Structure and Markings as Stimuli for Autonomous Construction. In 2017 18th
+     International Conference on Advanced Robotics (ICAR), 296–302 (2017).
+ 10. Tzoumas, G., Salina, L., McConville, A., Richardson, T. & Hauert, S. Extinguishing Wildfires in Large Scale Scenarios
+     Using Swarms of UAVs. Swarm Intell. 71–83 (2024).
+ 11. Shi, Y., Tzoumas, G. & Hauert, S. Dynamic Space Partition Algorithm with an Archimedean Spiral for Wildfire Detection
+     Using a Swarm of Uavs. In 2025 International Conference on Unmanned Aircraft Systems (ICUAS), 1057–1063 (2025).
+ 12. Fuady, S., Tarapore, D. & Soorati, M. D. Subcdm: Collective decision-making with a swarm subset. 2025 IEEE/RSJ Int.
+     Conf. on Intell. Robots Syst. (IROS) 2633–2638 (2025).
+ 13. Dorigo, M., Pacheco, A., Reina, A. & Strobel, V. Blockchain technology for mobile multi-robot systems. Nat. Rev. Electr.
+     Eng. 1, 264–274 (2024).
+ 14. Winfield, A. F., Swana, M., Ives, J. & Hauert, S. On the ethical governance of swarm robotic systems in the real world.
+     Philos. Transactions A 383, 20240142 (2025).
+ 15. Higgins, F., Tomlinson, A. & Martin, K. M. Threats to the swarm: Security considerations for swarm robotics. Int. J. on
+     Adv. Secur. 2, 288–297 (2009).
+
+
+                                                                                                                           21/26
+16. Higgins, F., Tomlinson, A. & Martin, K. M. Survey on security challenges for swarm robotics. In Proceedings of the 5th
+    International Conference on Autonomic and Autonomous Systems (ICAS 2009), 307–312 (IEEE Press, 2009).
+17. Hunt, E. R. & Hauert, S. A checklist for safe robot swarms. Nat. Mach. Intell. 2, 420–422 (2020).
+18. Valentini, G., Ferrante, E. & Dorigo, M. The Best-of-n Problem in Robot Swarms: Formalization, State of the Art, and
+    Novel Perspectives. Front. Robotics AI 4, 9 (2017).
+19. Valentini, G., Hamann, H. & Dorigo, M. Efficient Decision-Making in a Self-Organizing Robot Swarm: On the Speed
+    Versus Accuracy Trade-Off. In Proceedings of the 14th International Conference on Autonomous Agents and Multiagent
+    Systems (AAMAS 2015), 1305–1314 (IFAAMAS, 2015).
+20. Reina, A., Valentini, G., Fernández-Oto, C., Dorigo, M. & Trianni, V. A Design Pattern for Decentralised Decision
+    Making. PLOS ONE 10, e0140950 (2015).
+21. Masi, G. D. et al. Robot swarm democracy: the importance of informed individuals against zealots. Swarm Intell. 15,
+    315–338 (2021).
+22. Antonic, N., Zakir, R., Dorigo, M. & Reina, A. Collective robustness of heterogeneous decision-makers against stubborn
+    individuals. In AAMAS, 68–77 (2024).
+23. Zakir, R., Carletti, T., Dorigo, M. & Reina, A. Bio-inspired decision making in robot swarms under biases. Nat. Commun.
+    17, 9774 (2026).
+24. Zakir, R., Dorigo, M. & Reina, A. Miscommunication between robots can improve group accuracy in best-of-n decision-
+    making. In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS 2024), 9014–9021 (IEEE Press,
+    2024).
+25. Zakir, R., Dorigo, M. & Reina, A. Robot Swarms Break Decision Deadlocks in Collective Perception Through Cross-
+    Inhibition. In Swarm Intelligence – Proceedings of ANTS 2022 – 13th International Conference, vol. 13491 of LNCS,
+    209–221 (Springer, 2022).
+26. Reina, A., Zakir, R., De Masi, G. & Ferrante, E. Cross-inhibition leads to group consensus despite the presence of
+    strongly opinionated minorities and asocial behaviour. Commun. Phys. 6, 236 (2023).
+27. Crosscombe, M., Lawry, J., Hauert, S. & Homer, M. Robust distributed decision-making in robot swarms: Exploiting
+    a third truth state. In 2017 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 4326–4332
+    (2017).
+28. Moussa, M. & Beltrame, G. On the robustness of consensus-based behaviors for robot swarms. Swarm Intell. 14, 205–231
+    (2020).
+29. Primiero, G., Tuci, E., Tagliabue, J. & Ferrante, E. Swarm Attack: A Self-organized Model to recover from Malicious
+    Communication Manipulation in a Swarm of Simple Simulated Agents. In Swarm Intelligence – Proceedings of ANTS
+    2018 – 11th International Conference, 213–224 (Springer, 2018).
+30. Tarapore, D., Christensen, A. L. & Timmis, J. Generic, scalable and decentralized fault detection for robot swarms. PLOS
+    ONE 12, 1–29 (2017).
+31. Castelló Ferrer, E., Hardjono, T., Pentland, A. & Dorigo, M. Secure and secret cooperation in robot swarms. Sci. Robotics
+    6, abf1538 (2021).
+32. Peña Queralta, J., Li, Q., Ferrer, E. C. & Westerlund, T. Secure encoded instruction graphs for end-to-end data validation
+    in autonomous robots. IEEE Internet Things J. 9, 18028–18040 (2022).
+33. Strobel, V., Pacheco, A. & Dorigo, M. Robot swarms neutralize harmful Byzantine robots using a blockchain-based token
+    economy. Sci. Robotics 8, eabm4636 (2023).
+34. Zhao, H. et al. A generic framework for Byzantine-tolerant consensus achievement in robot swarms. In IEEE/RSJ
+    International Conference on Intelligent Robots and Systems (IROS 2023), 8839–8846 (IEEE Press, 2023).
+35. Moroncelli, A. et al. Byzantine fault detection in swarm-SLAM using blockchain and geometric constraints. In Swarm
+    Intelligence – Proceedings of ANTS 2024 – 14th International Conference, vol. 14987 of LNCS, 42–56 (Springer, 2024).
+36. Van Calck, L., Pacheco, A., Strobel, V., Dorigo, M. & Reina, A. A blockchain-based information market to incentivise
+    cooperation in swarms of self-interested robots. Sci. Reports 13, 20417 (2023).
+37. Zakir, R., Dorigo, M. & Strobel, V. Mitigating latency and partitioning through size regulation in blockchain-enabled
+    robot swarms. In Swarm Intelligence – Proceedings of ANTS 2026 – 15th International Conference, LNCS, 175–188
+    (Springer, Cham, 2026).
+
+
+                                                                                                                        22/26
+38. Bijani, S. & Robertson, D. A review of attacks and security approaches in open multi-agent systems. Artif. Intell. Rev. 42,
+    607–636 (2014).
+39. Zikratov, I., Maslennikov, O., Lebedev, I., Ometov, A. & Andreev, S. Dynamic trust management framework for robotic
+    multi-agent systems. In Galinina, O., Balandin, S. & Koucheryavy, Y. (eds.) Proceedings of the 12th International
+    Conference on Next Generation Teletraffic and Wired/Wireless Advanced Networking (NEW2AN 2016), and the 5th
+    Conference on Internet of Things and Smart Spaces (ruSMART 2016), 339–348 (Springer, 2016).
+40. Wang, S. et al. Decentralized autonomous organizations: Concept, Model, and Applications. IEEE Transactions on
+    Comput. Soc. Syst. 6, 870–878 (2019).
+41. Hassan, S. & De Filippi, P. Decentralized Autonomous Organization. Internet Policy Rev. 10, 1–10 (2021).
+42. Lustenberger, M., Spychiger, F., Küng, L. & Cuadra, P. Mastering DAOs: A Practical Guidebook for Building and
+    Managing Decentralized Autonomous Organizations. Working Paper Series 5001424, Social Science Research Network
+    (2024).
+43. Werner, S. et al. SoK: Decentralized finance (DeFi). In Proceedings of the 4th ACM Conference on Advances in Financial
+    Technologies, 30–46 (ACM, 2022).
+44. The Sky Protocol: Sky’s Multi-Collateral Dai (mcd) System, The Maker Protocol White Paper (2020). https://makerdao.
+    com/en/whitepaper/, Accessed November 19, 2025.
+45. Adams, H., Zinsmeister, N., Salem, M., Keefer, R. & Robinson, D. Uniswap v3 core (2021). https://app.uniswap.org/
+    whitepaper-v3.pdf.
+46. Big Green DAO. https://dao.biggreen.org/home.
+47. Owocki, K. & Lister, M. Gitcoin 2.0. https://www.gitcoin.co/whitepaper/read.
+48. A gentle introduction to the Arbitrum DAO. https://docs.arbitrum.foundation/gentle-intro-dao-governance.
+49. Hart, S. et al. The Cosmos Hub. https://gateway.pinata.cloud/ipfs/QmWXkzM74FCiERdZ1WrU33cqdStUK9dz1A8oEvYcnBAHeo
+    (2022).
+50. Guidi, B. & Michienzi, A. Social games and Blockchain: exploring the Metaverse of Decentraland. In 2022 IEEE 42nd
+    International Conference on Distributed Computing Systems Workshops (ICDCSW), 199–204 (IEEE Press, 2022).
+51. Jardi, Y., Ordano, E., Meilich, A. & Araoz, M. Decentraland: Redefining Digital Ownership and the Future of the Internet.
+    https://decentraland.org/whitepaper2.pdf.
+52. Egliston, B. & Carter, M. Cryptogames: The promises of blockchain for the future of the videogame industry. New Media
+    & Soc. 26, 6756–6778 (2024).
+53. Spychiger, F., Makode, P. K., Küng, L. & Tessone, C. J. Governance and maintenance for a DAO with physical assets-an
+    agent-based Model. In 2024 IEEE international conference on omni-layer intelligent systems (COINS), 1–6 (IEEE Press,
+    2024).
+54. Hunhevicz, J., Wang, H., Hess, L. & Hall, D. no1s1 - a blockchain-based dao prototype for autonomous space. In
+    Proceedings of the 2021 European Conference on Computing in Construction, vol. 2, 27–33, DOI: 10.35490/EC3.2021.185
+    (University College Dublin, 2021).
+55. Lustenberger, M., Spychiger, F., Küng, L. & Martignoni, J. DAOs as property owners: a conceptual exploration from the
+    perspective of organizational system theory. J. Organ. Des. 1–17 (2025).
+56. Pacheco, A. et al. Toychain: A simple blockchain for research in swarm robotics (2024). 2407.06630.
+57. Bartashevich, P. & Mostaghim, S. Benchmarking collective perception: New task difficulty metrics for collective
+    decision-making. In Moura Oliveira, P., Novais, P. & Reis, L. P. (eds.) Progress in Artificial Intelligence, 699–711
+    (Springer, Cham, 2019).
+58. Pinciroli, C. et al. ARGoS: A Modular, Parallel, Multi-engine Simulator for Multi-Robot Systems. Swarm Intell. 6,
+    271–295 (2012).
+59. Szilágyi, P. EIP 225: Clique proof-of-authority consensus protocol (2017).
+60. Pacheco, A., Strobel, V. & Dorigo, M. A blockchain-controlled physical robot swarm communicating via an ad-hoc
+    network. In Swarm Intelligence – Proceedings of ANTS 2020 – 12th International Conference, vol. 12421 of LNCS, 3–15
+    (Springer, 2020).
+
+
+                                                                                                                        23/26
+61. Pacheco, A., Strobel, V., Reina, A. & Dorigo, M. Real-time coordination of a foraging robot swarm using blockchain
+    smart contracts. In Swarm Intelligence – Proceedings of ANTS 2022 – 13th International Conference, vol. 13491 of
+    LNCS, 196–208 (Springer, 2022).
+62. Strobel, V., Castelló Ferrer, E. & Dorigo, M. Blockchain Technology Secures Robot Swarms: A Comparison of Consensus
+    Protocols and Their Resilience to Byzantine Robots. Front. Robotics AI 7, 54 (2020).
+63. Hsieh, Y.-Y., Vergne, J.-P., Anderson, P., Lakhani, K. & Reitzig, M. Bitcoin and the rise of decentralized autonomous
+    organizations. J. Organ. Des. 7, 14 (2018).
+64. Reijers, W. et al. Now the code runs itself: On-chain and off-chain governance of blockchain technologies. Topoi 40,
+    821–831, DOI: 10.1007/s11245-018-9626-5 (2021).
+65. Van Vulpen, P. & Jansen, S. Decentralized autonomous organization design for the commons and the common good.
+    Front. Blockchain 6, 1287249 (2023).
+66. Higgins, F., Tomlinson, A. & Martin, K. M. Survey on security challenges for swarm robotics. In 2009 Fifth International
+    Conference on Autonomic and Autonomous Systems, 307–312 (IEEE, 2009).
+67. Pacheco, A. et al. Swarm Oracle: Trustless Blockchain Agreements through Robot Swarms (2025). 2509.15956.
+68. Yongming, Y., Xihui, C., Qingjun, L. & Yantao, T. Swarm robots task allocation based on local communication. In 2010
+    International Conference on Computer, Mechatronics, Control and Electronic Engineering, vol. 5, 415–418 (IEEE, 2010).
+69. Yang, Y., Zhou, C. & Tian, Y. Swarm robots task allocation based on response threshold model. In 2009 4th international
+    conference on autonomous robots and agents, 171–176 (IEEE, 2009).
+70. Ostrom, E. Governing the Commons (Cambridge University Press, 2015).
+71. Dias, M., Zlot, R., Kalra, N. & Stentz, A. Market-based multirobot coordination: A survey and analysis. Proc. IEEE 94,
+    1257–1270 (2006).
+72. Jagtap, D., Yen, A., Wu, H., Schulman, A. & Pannuto, P. Federated infrastructure: Usage, patterns, and insights from
+    “the people’s network”. In Proceedings of the 21st ACM Internet Measurement Conference, IMC ’21 (Association for
+    Computing Machinery, NY, USA, 2021).
+73. Fisch, B. Tight proofs of space and replication. In Advances in Cryptology – EUROCRYPT 2019, vol. 11477 of Lecture
+    Notes in Computer Science, 324–348 (Springer, Cham, 2019).
+74. Dorigo, M., Theraulaz, G. & Trianni, V. Reflections on the future of swarm robotics. Sci. Robotics 5, abe4385 (2020).
+75. Mathews, N., Christensen, A., O’Grady, R., Mondada, F. & Dorigo, M. Mergeable nervous systems for robots. Nat.
+    Commun. 8 (2017).
+76. Kengyel, D. et al. Potential of heterogeneity in collective behaviors: A case study on heterogeneous swarms. In
+    International conference on principles and practice of multi-agent systems, 201–217 (Springer, 2015).
+77. Zhu, W. et al. Self-organizing nervous systems for robot swarms. Sci. Robotics 9, eadl5161 (2024). https://www.science.
+    org/doi/pdf/10.1126/scirobotics.adl5161.
+78. Davidson, S. The nature of the decentralised autonomous organisation. J. Institutional Econ. 21, e5 (2025).
+79. Colony. Colony network documentation. https://colony.io (2026). Accessed 2026.
+80. Borgogno, O. & Martino, E. D. Decentralised autonomous organisations: Targeting the potential beyond the hype. Law,
+    Innov. Technol. 16, 392–431 (2024).
+81. Aave Labs. Aave documentation: Protocol overview. https://aave.com/docs (2026). Accessed: 2026-07-15.
+82. Curve Finance. Dao ownership. https://curve.readthedocs.io/dao-ownership.html (2026). Accessed: 2026-07-15.
+83. Simionato, G., Strobel, V., Cimino, M. & Dorigo, M. Analysis and Mitigation of Inconsistencies in Blockchain-Enabled
+    Robot Swarms. In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS 2025), 166–172 (IEEE
+    Press, 2025).
+84. Ashcraft, C. C., Goodrich, M. A. & Crandall, J. W. Moderating operator influence in human-swarm systems. In 2019
+    IEEE International Conference on Systems, Man and Cybernetics (SMC), 4275–4282 (2019).
+85. Kolling, A., Walker, P., Chakraborty, N., Sycara, K. & Lewis, M. Human interaction with robot swarms: A survey. IEEE
+    Transactions on Human-Machine Syst. 46, 9–26 (2016).
+86. Yan, Z., Jouandeau, N. & Cherif, A. A. A survey and analysis of multi-robot coordination. Int. J. Adv. Robotic Syst. 10,
+    399 (2013).
+
+
+                                                                                                                      24/26
+ 87. Gupta, H. et al. Group-level behavioral switch in a robot swarm using blockchain. In Swarm Intelligence – Proceedings
+     of ANTS 2024 – 14th International Conference, vol. 14987 of LNCS, 98–111 (Springer, 2024).
+ 88. St-Onge, D., Varadharajan, V. S., Švogor, I. & Beltrame, G. From design to deployment: Decentralized coordination of
+     heterogeneous robotic teams. Front. Robotics AI Volume 7 (2020).
+ 89. Francesca, G., Brambilla, M., Brutschy, A., Trianni, V. & Birattari, M. Automode: A novel approach to the automatic
+     design of control software for robot swarms. Swarm Intell. 8, 89–112 (2014).
+ 90. Szpirer, J., Ramos, D. G. & Birattari, M. Automatic design of robot swarms that perform composite missions: an approach
+     based on inverse reinforcement learning. In 2024 IEEE/RSJ International Conference on Intelligent Robots and Systems
+     (IROS), 5791–5798 (IEEE, 2024).
+ 91. Cong, L. W., Rabetti, D., Wang, C. C. Y. & Yan, Y. Centralized governance in decentralized organizations. SSRN
+     Working Paper 5168660, Social Science Research Network (2025).
+ 92. Mehar, M. I. et al. Understanding a revolutionary and flawed grand experiment in blockchain: The DAO attack. J. Cases
+     on Inf. Technol. 21, 19–32 (2019).
+ 93. Feichtinger, R., Fritsch, R., Heimbach, L., Vonlanthen, Y. & Wattenhofer, R. SoK: Attacks on DAOs. In 6th Conference
+     on Advances in Financial Technologies (AFT 2024), vol. 316 of Leibniz International Proceedings in Informatics (LIPIcs),
+     28:1–28:27 (Schloss Dagstuhl – Leibniz-Zentrum für Informatik, Dagstuhl, Germany, 2024).
+ 94. Nakamoto, S. Bitcoin: A peer-to-peer electronic cash system (2008). https://bitcoin.org/bitcoin.pdf.
+ 95. Buterin, V. A next-generation smart contract and decentralized application platform. Ethereum project white paper. (2014).
+     https://ethereum.org/en/whitepaper/.
+ 96. Ding, Q., Liebau, D., Wang, Z. & Xu, W. A survey on decentralized autonomous organizations (DAOs) and their
+     governance. World Sci. Annu. Rev. Fintech 1, 2350001 (2023).
+ 97. Yu, J., Kozhaya, D., Decouchant, J. & Esteves-Verissimo, P. Repucoin: Your reputation is your power. IEEE Transactions
+     on Comput. 68, 1225–1237 (2019).
+ 98. Tamai, S. & Kasahara, S. DAO voting mechanism resistant to whale and collusion problems. Front. Blockchain 7,
+     1405516 (2024).
+ 99. Karjalainen, R. Governance in decentralized networks (2020).
+100. Kaal, W. A. Blockchain-based corporate governance. Stanf. J. Blockchain Law & Policy 4, 3–23 (2021).
+101. Lalley, S. P. & Weyl, E. G. Quadratic voting: How mechanism design can radicalize democracy. AEA Pap. Proc. 108,
+     33–37 (2018).
+102. Sharma, T. et al. Unpacking How Decentralized Autonomous Organizations (DAOs) Work in Practice. In 2024 IEEE
+     International Conference on Blockchain and Cryptocurrency (ICBC), 416–424 (IEEE Press, 2024).
+103. Fan, Y., Zhang, L., Wang, R. & Imran, M. A. Insight Into Voting in DAOs: Conceptual Analysis and a Proposal for
+     Evaluation Framework. IEEE Netw. 38, 92–99 (2024).
+104. Jungnickel, M., Özdemir Sönmez, F., Mulligan, C. & Knottenbelt, W. J. DAO governance: Voting power, participation,
+     and controversy—A review and an empirical analysis. Distributed Ledger Technol. Res. Pract. 5, 1–25 (2026).
+105. Strobel, V., Castelló Ferrer, E. & Dorigo, M. Managing Byzantine robots via blockchain technology in a swarm robotics
+     collective decision making scenario. In Proceedings of the 17th International Conference on Autonomous Agents and
+     MultiAgent Systems (AAMAS 2018), 541–549 (2018).
+
+Funding Statement
+R. Zakir, V. Strobel and M. Dorigo acknowledge support from the Belgian F.R.S.-FNRS, of which they are a FRIA Doctoral
+student, Postdoc and a Research Director, respectively. A. Reina acknowledges support from DFG under Germany’s Excellence
+Strategy – EXC 2117 - 422037984.
+
+Author contributions statement
+V.S. and A.R. conceived the original idea. V.S. directed the project. R.Z. designed and implemented the control code for the
+robot simulations and ran them. R.Z., V.S. and A.M.P. ran the robot demonstrations. R.Z. generated the figures. M.D. provided
+the computing and robotics infrastructure that supported the project. R.Z. wrote the first draft of the paper, and all authors
+reviewed and revised the paper.
+
+
+                                                                                                                        25/26
+Competing interests statement
+The authors declare no competing interests.
+
+
+
+
+                                              26/26
+

@@ -1,0 +1,237 @@
+{
+ "R0_note": "Engineering validation (replay/hash/invariant checks) is NOT R0. R0 = paper direction at alpha=10; computed result above.",
+ "R0_source": "outputs/matrix/r0_gate.json",
+ "R0_status": "R0 FAIL - paper direction NOT REPRODUCED",
+ "all_pass": true,
+ "harness": "swarm_r0.py arm=A version=0.2.0",
+ "n": 35,
+ "passed": 35,
+ "stamp": "SEED-v0.1 cdc788b1996bd923d48a034b28f58ee728ce10d82924724c722b2b7be7e719f5",
+ "tamper": {
+  "all_detected": true,
+  "results": [
+   {
+    "detected": true,
+    "first_errors": [
+     "line 35: hash chain broken",
+     "block f092b276beb0: tx id mismatch",
+     "block f092b276beb0: state hash mismatch on re-execution"
+    ],
+    "tamper": "edit_estimate_no_rehash"
+   },
+   {
+    "detected": true,
+    "first_errors": [
+     "block f092b276beb0: tx id mismatch",
+     "block f092b276beb0: state hash mismatch on re-execution",
+     "block f092b276beb0: receipt mismatch on re-execution"
+    ],
+    "tamper": "edit_estimate_rehash_chain"
+   },
+   {
+    "detected": true,
+    "first_errors": [
+     "block 735fb1368ce9: state hash mismatch on re-execution",
+     "block 735fb1368ce9: receipt mismatch on re-execution",
+     "block 642b25fb0af6: unknown parent"
+    ],
+    "tamper": "deep_forgery_estimate_rehash_all"
+   },
+   {
+    "detected": true,
+    "first_errors": [
+     "block c406787a8d1b: state hash mismatch on re-execution",
+     "block c406787a8d1b: receipt mismatch on re-execution",
+     "block 41d048080e5b: unknown parent"
+    ],
+    "tamper": "deep_forgery_vote_list"
+   },
+   {
+    "detected": true,
+    "first_errors": [
+     "truth.json hash does not match footer"
+    ],
+    "tamper": "truth_relabel"
+   }
+  ],
+  "run": "det1",
+  "stamp": "SEED-v0.1 cdc788b1996bd923d48a034b28f58ee728ce10d82924724c722b2b7be7e719f5"
+ },
+ "tests": [
+  {
+   "detail": "[[\"ubi\",0,40],[\"estimate\",0,0.2,0]]",
+   "pass": true,
+   "test": "ubi_and_stake"
+  },
+  {
+   "detail": "0.3",
+   "pass": true,
+   "test": "round_close_mean"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "refund_and_valid_count"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "new_robot_not_eligible"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "alpha_eligible_after_alpha_valid_estimates"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "no_vote_below_min5"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "vote_opens_at_50pct_and_5"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "not_executed_before_5_blocks"
+  },
+  {
+   "detail": "[[\"vote_exec\",1,6,{\"0\":1,\"5\":5},[5]],[\"remove\",5,10,[0,1,2,3,4],60,12,0]]",
+   "pass": true,
+   "test": "executed_after_5_blocks"
+  },
+  {
+   "detail": "300->360",
+   "pass": true,
+   "test": "redistribution_to_voters"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "removed_robot_rejected"
+  },
+  {
+   "detail": "[[\"vote_exec\",1,10,{\"10\":4,\"11\":5},[11]],[\"remove\",11,5,[0,1,2,3,4],0,0,0]]",
+   "pass": true,
+   "test": "removal_needs_50pct_lists_and_5_votes"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "collusion_window_flags_identical_triple"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "collusion_window_no_chaining"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "brief_mean_band_collusion_flags_3plus_within_0.07_of_mean"
+  },
+  {
+   "detail": "[]",
+   "pass": true,
+   "test": "adaptive_k_std_when_no_collusion"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "k_flag_changes_threshold"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "byzantine_inverted_flags_near_mean"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "inturn_sealer_difficulty_2"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "recents_rule_blocks_resign"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "out_of_turn_diff_1"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "period_15s_enforced"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "component_prefers_inturn_sealer"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "pending_tx_removed_from_pool_on_inclusion"
+  },
+  {
+   "detail": "{\"anc_h\":0,\"ancestor\":\"70eecc2334e44ace38385841cc6e34a15d93eb720fff79aedd98d41f7744d21d\",\"depth_new\":2,\"depth_old\":1,\"new\":\"e23218c87c00df258b1bb697be6b8655b6ccb2b542ea9bae17c01f167f68edb7\",\"old\":\"020ab9d9ae2b8dbcdbb45c20941e296f3687ad0988fa2ef2c989c895ec1ce1ca\",\"robot\":3}",
+   "pass": true,
+   "test": "reorg_rollback_detected"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "orphaned_tx_returns_to_pool"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "state_after_reorg_equals_fresh_replay"
+  },
+  {
+   "detail": "5f810fb2dfefafa0",
+   "pass": true,
+   "test": "deterministic_byte_identical_ledger"
+  },
+  {
+   "detail": "[]",
+   "pass": true,
+   "test": "verify_short_run"
+  },
+  {
+   "detail": "[[\"edit_estimate_no_rehash\",true],[\"edit_estimate_rehash_chain\",true],[\"deep_forgery_estimate_rehash_all\",true],[\"deep_forgery_vote_list\",true],[\"truth_relabel\",true]]",
+   "pass": true,
+   "test": "tamper_all_detected"
+  },
+  {
+   "detail": "[]",
+   "pass": true,
+   "test": "robot_has_no_truth_attrs"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "I6_structural_no_truth_reads_in_swarm_code"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "adversary_cannot_identify_honest_kind"
+  },
+  {
+   "detail": "",
+   "pass": true,
+   "test": "scorer_scores_every_tick"
+  },
+  {
+   "detail": "[]",
+   "pass": true,
+   "test": "scorer_uses_no_swarm_classes"
+  }
+ ]
+}

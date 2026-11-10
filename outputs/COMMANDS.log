@@ -1,0 +1,58 @@
+[selftest] start=2026-11-07 09:14:40 CST end=2026-11-07 09:14:41 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py selftest --scratch outputs/selftest_scratch > outputs/selftest.json
+[exp1_naive_a1] start=2026-11-07 09:14:44 CST end=2026-11-07 09:15:08 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py --exp 1 --alpha 1 --byz naive --runs 10 --seed 20261107 --k 2 --workers 7 --out outputs/matrix/exp1_naive_a1 > outputs/matrix/exp1_naive_a1.stdout.json
+[exp1_naive_a10] start=2026-11-07 09:15:08 CST end=2026-11-07 09:15:15 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py --exp 1 --alpha 10 --byz naive --runs 10 --seed 20261107 --k 2 --workers 7 --out outputs/matrix/exp1_naive_a10 > outputs/matrix/exp1_naive_a10.stdout.json
+[exp1_smart_a1] start=2026-11-07 09:15:15 CST end=2026-11-07 09:15:40 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py --exp 1 --alpha 1 --byz smart --runs 10 --seed 20261107 --k 2 --workers 7 --out outputs/matrix/exp1_smart_a1 > outputs/matrix/exp1_smart_a1.stdout.json
+[exp1_smart_a10] start=2026-11-07 09:15:40 CST end=2026-11-07 09:15:59 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py --exp 1 --alpha 10 --byz smart --runs 10 --seed 20261107 --k 2 --workers 7 --out outputs/matrix/exp1_smart_a10 > outputs/matrix/exp1_smart_a10.stdout.json
+[exp2_naive_a1] start=2026-11-07 09:15:59 CST end=2026-11-07 09:16:19 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py --exp 2 --alpha 1 --byz naive --runs 10 --seed 20261107 --k 2 --workers 7 --out outputs/matrix/exp2_naive_a1 > outputs/matrix/exp2_naive_a1.stdout.json
+[exp2_naive_a10] start=2026-11-07 09:16:19 CST end=2026-11-07 09:16:29 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py --exp 2 --alpha 10 --byz naive --runs 10 --seed 20261107 --k 2 --workers 7 --out outputs/matrix/exp2_naive_a10 > outputs/matrix/exp2_naive_a10.stdout.json
+[exp2_smart_a1] start=2026-11-07 09:16:29 CST end=2026-11-07 09:17:02 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py --exp 2 --alpha 1 --byz smart --runs 10 --seed 20261107 --k 2 --workers 7 --out outputs/matrix/exp2_smart_a1 > outputs/matrix/exp2_smart_a1.stdout.json
+[exp2_smart_a10] start=2026-11-07 09:17:02 CST end=2026-11-07 09:17:25 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py --exp 2 --alpha 10 --byz smart --runs 10 --seed 20261107 --k 2 --workers 7 --out outputs/matrix/exp2_smart_a10 > outputs/matrix/exp2_smart_a10.stdout.json
+[exp3_naive_a1] start=2026-11-07 09:17:25 CST end=2026-11-07 09:17:31 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py --exp 3 --alpha 1 --byz naive --runs 10 --seed 20261107 --k 2 --workers 7 --out outputs/matrix/exp3_naive_a1 > outputs/matrix/exp3_naive_a1.stdout.json
+[exp3_naive_a10] start=2026-11-07 09:17:31 CST end=2026-11-07 09:17:36 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py --exp 3 --alpha 10 --byz naive --runs 10 --seed 20261107 --k 2 --workers 7 --out outputs/matrix/exp3_naive_a10 > outputs/matrix/exp3_naive_a10.stdout.json
+[exp3_smart_a1] start=2026-11-07 09:17:36 CST end=2026-11-07 09:17:45 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py --exp 3 --alpha 1 --byz smart --runs 10 --seed 20261107 --k 2 --workers 7 --out outputs/matrix/exp3_smart_a1 > outputs/matrix/exp3_smart_a1.stdout.json
+[exp3_smart_a10] start=2026-11-07 09:17:45 CST end=2026-11-07 09:17:52 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py --exp 3 --alpha 10 --byz smart --runs 10 --seed 20261107 --k 2 --workers 7 --out outputs/matrix/exp3_smart_a10 > outputs/matrix/exp3_smart_a10.stdout.json
+[r0_gate] start=2026-11-07 09:17:52 CST end=2026-11-07 09:17:52 CST exit=3 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py r0-gate --root outputs/matrix > outputs/matrix/r0_gate.stdout.json
+[matrix_script] start=2026-11-07 09:14:44 CST end=2026-11-07 09:17:52 CST exit=3 cwd=/workspace/swarm-r0-2026-11-07
+  $ ./run_matrix.sh
+[tamper_exp2_smart_a10_run00] start=2026-11-07 09:18:23 CST end=2026-11-07 09:18:24 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py tamper-test --run outputs/matrix/exp2_smart_a10/run_00_seed20261107 --scratch outputs/tamper_scratch > outputs/tamper_test_exp2_smart_a10_run00.json
+[xproc_replay_exp1_naive_a1_run_03_seed20261110] start=2026-11-07 09:18:24 CST end=2026-11-07 09:18:29 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c PYTHONHASHSEED=987 python3 swarm_r0.py replay --run outputs/matrix/exp1_naive_a1/run_03_seed20261110 --full > outputs/xproc_replay_exp1_naive_a1_run_03_seed20261110.json
+[xproc_replay_exp2_smart_a10_run_05_seed20261112] start=2026-11-07 09:18:29 CST end=2026-11-07 09:18:31 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c PYTHONHASHSEED=987 python3 swarm_r0.py replay --run outputs/matrix/exp2_smart_a10/run_05_seed20261112 --full > outputs/xproc_replay_exp2_smart_a10_run_05_seed20261112.json
+[xproc_replay_exp3_smart_a10_run_09_seed20261116] start=2026-11-07 09:18:31 CST end=2026-11-07 09:18:33 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c PYTHONHASHSEED=987 python3 swarm_r0.py replay --run outputs/matrix/exp3_smart_a10/run_09_seed20261116 --full > outputs/xproc_replay_exp3_smart_a10_run_09_seed20261116.json
+[single_run_exp3_smart_a10_seed20261116] start=2026-11-07 09:18:33 CST end=2026-11-07 09:18:35 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py run --exp 3 --alpha 10 --byz smart --seed 20261116 --k 2 --out outputs/single_run_check > outputs/single_run_check.stdout.json
+[annotate_r0] start=2026-11-07 09:18:44 CST end=2026-11-07 09:18:44 CST exit=1 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 annotate_r0.py outputs > outputs/annotate_r0.stdout.json
+[post_annotate_replay] start=2026-11-07 09:18:44 CST end=2026-11-07 09:18:44 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py replay --run outputs/matrix/exp1_naive_a10/run_00_seed20261107 > outputs/post_annotate_replay.json
+[annotate_r0_retry] start=2026-11-07 09:18:49 CST end=2026-11-07 09:18:49 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 annotate_r0.py outputs > outputs/annotate_r0.stdout.json
+[post_annotate_replay_full] start=2026-11-07 09:18:49 CST end=2026-11-07 09:18:50 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c python3 swarm_r0.py replay --run outputs/matrix/exp1_naive_a10/run_00_seed20261107 --full > outputs/post_annotate_replay_full.json
+[zip_core] start=2026-11-07 09:20:25 CST end=2026-11-07 09:20:25 CST exit=127 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c zip -qr swarm-r0-v0.2.0-core.zip swarm_r0.py run_cmd.sh run_matrix.sh annotate_r0.py README.md RESULTS.md ASSUMPTIONS.md CHANGELOG.md COMPLIANCE.md SECRET_SCAN.md SHA256SUMS source outputs/COMMANDS.log outputs/swarm_r0.py.sha256 outputs/selftest.json outputs/tamper_test_exp2_smart_a10_run00.json outputs/xproc_replay_*.json outputs/post_annotate_replay*.json outputs/annotate_r0.stdout.json outputs/matrix/r0_gate.json outputs/matrix/*.stdout.json outputs/matrix/*/metrics.json
+[zip_full] start=2026-11-07 09:20:25 CST end=2026-11-07 09:20:25 CST exit=127 cwd=/workspace/swarm-r0-2026-11-07
+  $ bash -c zip -qr swarm-r0-v0.2.0-full.zip . -x '*.zip' -x 'ZIP_SHA256SUMS'
+[make_zips_py] start=2026-11-07 09:20:37 CST end=2026-11-07 09:20:42 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ python3 make_zips.py
+[make_zips_py_rebuild] start=2026-11-07 09:20:52 CST end=2026-11-07 09:20:58 CST exit=0 cwd=/workspace/swarm-r0-2026-11-07
+  $ python3 make_zips.py
+[final_zip_build] 2026-11-07 09:21:09 CST (recorded before build so SHA256SUMS stays valid; zip SHAs in ZIP_SHA256SUMS)
+  $ python3 make_zips.py && sha256sum *.zip > ZIP_SHA256SUMS

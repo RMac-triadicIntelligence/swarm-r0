@@ -1,0 +1,120 @@
+{
+ "R0_note": "Engineering validation (replay/hash/invariant checks) is NOT R0. R0 = paper direction at alpha=10; computed result above.",
+ "R0_source": "outputs/matrix/r0_gate.json",
+ "R0_status": "R0 FAIL - paper direction NOT REPRODUCED",
+ "aggregate_over_validated_runs": {
+  "byz_share_eligible_gt_half_ticks": {
+   "max": 3011.0,
+   "mean": 1606.2,
+   "median": 1290.5,
+   "min": 505.0,
+   "n": 10,
+   "sd": 858.1865635034015
+  },
+  "byz_share_eligible_max": {
+   "max": 1.0,
+   "mean": 0.7239415044020306,
+   "median": 0.6899038461538461,
+   "min": 0.6,
+   "n": 10,
+   "sd": 0.11748615891810696
+  },
+  "final15_mean_abs_error": {
+   "max": 0.18345454545454543,
+   "mean": 0.12853732324958678,
+   "median": 0.1360355098039216,
+   "min": 0.07143749999999999,
+   "n": 10,
+   "sd": 0.041729832747085825
+  },
+  "final_ref_height": {
+   "max": 226.0,
+   "mean": 156.9,
+   "median": 154.5,
+   "min": 93.0,
+   "n": 10,
+   "sd": 53.30509669190492
+  },
+  "final_size": {
+   "max": 116.0,
+   "mean": 70.6,
+   "median": 66.0,
+   "min": 34.0,
+   "n": 10,
+   "sd": 27.649392197458678
+  },
+  "m1_mean_abs_error": {
+   "max": 0.1574406843391615,
+   "mean": 0.12383402355303888,
+   "median": 0.12417970925440236,
+   "min": 0.09508559022874893,
+   "n": 10,
+   "sd": 0.023109920370629172
+  },
+  "m2_tpr": {
+   "max": 1.0,
+   "mean": 0.38788595620500743,
+   "median": 0.2992213570634038,
+   "min": 0.0,
+   "n": 10,
+   "sd": 0.31404097880319526
+  },
+  "m3_fpr": {
+   "max": 0.5,
+   "mean": 0.35098621405426,
+   "median": 0.32403846153846155,
+   "min": 0.22857142857142856,
+   "n": 10,
+   "sd": 0.0934984174436642
+  },
+  "m4_mean_swarm_size": {
+   "max": 59.373333333333335,
+   "mean": 35.628,
+   "median": 35.44611111111111,
+   "min": 22.424444444444443,
+   "n": 10,
+   "sd": 10.229876599286305
+  },
+  "m5_mean_byzantine_count": {
+   "max": 29.539722222222224,
+   "mean": 16.64113888888889,
+   "median": 17.668888888888887,
+   "min": 7.585555555555556,
+   "n": 10,
+   "sd": 6.430869211413058
+  },
+  "m6_robots_removed": {
+   "max": 134.0,
+   "mean": 42.4,
+   "median": 34.5,
+   "min": 18.0,
+   "n": 10,
+   "sd": 34.59351255815331
+  },
+  "max_size": {
+   "max": 116.0,
+   "mean": 70.6,
+   "median": 66.0,
+   "min": 34.0,
+   "n": 10,
+   "sd": 27.649392197458678
+  },
+  "n_reorgs": {
+   "max": 2577.0,
+   "mean": 1470.9,
+   "median": 1488.5,
+   "min": 820.0,
+   "n": 10,
+   "sd": 601.7253803300416
+  }
+ },
+ "byz_share_eligible_gt_half_any_tick_runs": 10,
+ "engineering_validation": {
+  "full_resim_required": true,
+  "note": "engineering validation only; not evidence of paper fidelity or R0",
+  "runs_total": 10,
+  "runs_validated": 10
+ },
+ "out": "/workspace/swarm-r0-2026-11-07/outputs/matrix/exp1_naive_a10",
+ "stamp": "SEED-v0.1 cdc788b1996bd923d48a034b28f58ee728ce10d82924724c722b2b7be7e719f5"
+}
